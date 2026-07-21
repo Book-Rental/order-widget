@@ -5,7 +5,13 @@ import { OrderBook } from "../../types/order";
 interface BookCardProps {
   book: OrderBook;
 }
-
+type Props = {
+  setPage: React.Dispatch<
+    React.SetStateAction<
+      "order-history" | "order-details" | "book-details"
+    >
+  >;
+};
 const STATUS_CONFIG = {
   CONFIRMED: {
     label: "Confirmed",
@@ -29,7 +35,7 @@ const STATUS_CONFIG = {
   },
 };
 
-const BookCard = ({ book }: BookCardProps) => {
+const BookCard = ({ book }: BookCardProps, {setPage}: Props) => {
   const status = STATUS_CONFIG[book.status];
 
   const getDateInfo = () => {
@@ -159,7 +165,7 @@ const BookCard = ({ book }: BookCardProps) => {
               <Rb_Button>Rent Again</Rb_Button>
             )}
 
-            <Rb_Button variant="secondary">More Details</Rb_Button>
+            <Rb_Button variant="secondary" onClick={() => setPage("book-details")}>More Details</Rb_Button>
           </div>
         </div>
       </div>

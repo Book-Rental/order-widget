@@ -4,6 +4,7 @@ import "./index.css";
 
 export interface OrderWidgetOptions {
   containerElementId: string;
+  page: "order-history" | "order-details" | "book-details";
 }
 
 declare global {
@@ -21,6 +22,7 @@ window.renderReactWidget = (config: string) => {
 
   try {
     options = JSON.parse(config);
+    console.log("Widget Options:", options);
   } catch {
     console.error("Invalid widget config");
     return;

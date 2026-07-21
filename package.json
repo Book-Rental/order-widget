@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@rentbook/rentbook-ui-lib": "^0.0.2",
+    "@rentbook/rentbook-ui-lib": "^0.0.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "vite-plugin-css-injected-by-js": "^3.5.2"
