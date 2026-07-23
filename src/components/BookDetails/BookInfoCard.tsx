@@ -32,14 +32,14 @@ const BookInfoCard = ({ book }: BookInfoCardProps) => {
       key: "language",
       label: "Language",
       value: book.book.language,
-    },
+    }
   ];
 
   return (
     <div className="h-full rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <div className="flex gap-5">
+      <div className="flex flex-wrap gap-5">
 
-        <div className="flex w-32 flex-shrink-0 items-start justify-center">
+        <div className="mx-auto flex w-32 flex-shrink-0 items-start justify-center sm:mx-0">
           <Rb_Image
             src={book.book.coverImage}
             alt={book.book.name}
@@ -48,9 +48,9 @@ const BookInfoCard = ({ book }: BookInfoCardProps) => {
           />
         </div>
 
-        <div className="flex-1">
-          <div className="flex items-start justify-between">
-            <div>
+        <div className="min-w-[240px] flex-1">
+          <div className="flex flex-wrap items-start justify-between gap-2 max-sm:justify-center max-sm:text-center">
+            <div className="min-w-0">
               <Rb_Text variant="h6" className="font-semibold">
                 {book.book.name}
               </Rb_Text>
@@ -62,7 +62,7 @@ const BookInfoCard = ({ book }: BookInfoCardProps) => {
             <OrderStatusBadge status={book.itemStatus} />
           </div>
 
-          <div className="mt-5 grid grid-cols-[140px_1fr] gap-x-4 gap-y-3">
+          <div className="mt-5 grid grid-cols-[140px_minmax(0,1fr)] gap-x-4 gap-y-3">
             {detailRows.map((row) => (
               <div className="contents" key={row.key}>
                 <Rb_Text className="text-left text-gray-500">

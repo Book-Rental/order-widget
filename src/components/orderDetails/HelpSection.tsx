@@ -10,7 +10,7 @@ const HelpSection = ({
   supportPhone = "+91 98765 43210",
 }: HelpSectionProps) => {
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm max-md:p-4">
+    <section className="mx-auto w-full max-w-xl rounded-xl border border-gray-200 bg-white p-6 text-left shadow-sm max-md:p-4 sm:text-cente">
 
       <Rb_Text variant="h5">
         Need Help?
@@ -21,7 +21,7 @@ const HelpSection = ({
       </Rb_Text>
 
       <div className="mt-5 space-y-3">
-        <div className="flex items-center justify-center gap-2 max-md:flex-col">
+        <div className="flex items-center justify-start gap-2 max-md:flex-col sm:justify-center">
           <Rb_Text className="font-medium">
             Email:
           </Rb_Text>
@@ -29,7 +29,7 @@ const HelpSection = ({
             {supportEmail}
           </Rb_Text>
         </div>
-        <div className="flex items-center gap-2 max-md:flex-col max-md:items-start">
+        <div className="flex items-center justify-start gap-2 max-md:flex-col sm:justify-center">
           <Rb_Text className="font-medium">
             Phone:
           </Rb_Text>
@@ -40,7 +40,7 @@ const HelpSection = ({
         </div>
       </div>
 
-      <div className="mt-6 flex justify-center gap-3 max-md:flex-col">
+      <div className="mt-6 flex justify-start gap-3 max-md:flex-col sm:justify-center">
         <Rb_Button className="max-md:w-full">
           Contact Support
         </Rb_Button>

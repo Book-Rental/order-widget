@@ -20,25 +20,19 @@ const ShippingAddressCard = ({
         </Rb_Text>
 
         <Rb_Text>
-          {address.phone}
+          {address.city}, {address.state}
         </Rb_Text>
 
-        <Rb_Text>
-          {[
-            address.addressLine1,
-            address.addressLine2,
-            address.landmark,
-          ]
-            .filter(Boolean)
-            .join(", ")}
-        </Rb_Text>
-
-        <Rb_Text>
-          {`${address.city}, ${address.state} ${address.pincode}`}
-        </Rb_Text>
+        {/* <Rb_Text>
+          {`${address.city}, ${address.state} ${address.zipcode}`}
+        </Rb_Text> */}
 
         <Rb_Text>
           {address.country}
+        </Rb_Text>
+
+        <Rb_Text>
+          {address.phone}
         </Rb_Text>
       </div>
     </div>
