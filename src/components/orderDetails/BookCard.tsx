@@ -1,69 +1,62 @@
 import { Rb_Button, Rb_Image, Rb_Text } from "@rentbook/rentbook-ui-lib";
-import { OrderBook } from "../../types/order";
-
+import type { OrderItem } from "../../types/order";
+import OrderStatusBadge from "../OrderHistory/OrderStatusBadge";
 
 interface BookCardProps {
-  book: OrderBook;
+  book: OrderItem;
+  orderId: string;
 }
-type Props = {
-  setPage: React.Dispatch<
-    React.SetStateAction<
-      "order-history" | "order-details" | "book-details"
-    >
-  >;
-};
-const STATUS_CONFIG = {
-  CONFIRMED: {
-    label: "Confirmed",
-    badge: "bg-blue-100 text-blue-700",
-  },
-  SHIPPED: {
-    label: "Shipped",
-    badge: "bg-yellow-100 text-yellow-700",
-  },
-  DELIVERED: {
-    label: "Delivered",
-    badge: "bg-green-100 text-green-700",
-  },
-  RETURNED: {
-    label: "Returned",
-    badge: "bg-gray-100 text-gray-700",
-  },
-  CANCELLED: {
-    label: "Cancelled",
-    badge: "bg-red-100 text-red-700",
-  },
-};
 
-const BookCard = ({ book }: BookCardProps, {setPage}: Props) => {
-  const status = STATUS_CONFIG[book.status];
+const BookCard = ({ book, orderId  }: BookCardProps) => {
+  const formatDate = (date?: string | null) => {
+    if (!date) return "-";
+
+    return new Date(date).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const handleMoreDetails = () => {
+    window.history.pushState(
+      {},
+      "",
+      `/order-details?orderId=${orderId}&bookId=${book.bookId._id}`
+    );
+
+    window.dispatchEvent(
+      new PopStateEvent("popstate")
+    );
+  };
 
   const getDateInfo = () => {
-    switch (book.status) {
-      case "CONFIRMED":
-      case "SHIPPED":
+    switch (book.itemStatus) {
+      case "pending":
+      case "confirmed":
+      case "shipped":
         return {
-          label: "Estimated Delivery",
-          value: book.estimatedDeliveryDate,
+          label: "Expected Delivery date",
+          value: book.rental.rentStartDate
         };
 
-      case "DELIVERED":
-        return {
-          label: "Delivered On",
-          value: book.deliveredDate,
-        };
+      // case "delivered":
+      //   return {
+      //     label: "Delivered On",
+      //     value: book.deliveredDate,
+      //   };
 
-      case "RETURNED":
+      case "returned":
         return {
           label: "Returned On",
-          value: book.returnedDate,
+          value: book.rental.actualReturnDate
         };
 
-      case "CANCELLED":
-        return {
-          label: "Cancelled On",
-          value: book.cancelledDate,
-        };
+      // case "cancelled":
+      //   return {
+      //     label: "Cancelled On",
+      //     value: book.cancelledDate,
+      //   };
 
       default:
         return {
@@ -72,62 +65,54 @@ const BookCard = ({ book }: BookCardProps, {setPage}: Props) => {
         };
     }
   };
-
   const dateInfo = getDateInfo();
-
-  // Book identity rows (name + author) shown with labels, above the rental details
   const identityRows = [
-    { key: "book", label: "Book", value: book.name },
-    { key: "author", label: "Author", value: book.author },
+    { key: "book", label: "Book", value: book.bookId.name },
+    { key: "author", label: "Author", value: book.bookId.author },
   ];
-
-  // Rental detail rows — date info now lives in the top strip, so it's excluded here
   const detailRows = [
-    { key: "duration", label: "Rental Duration", value: book.rentalDuration },
+    {
+    key: "duration",
+      label: "Rental Duration",
+      value: `${book.rental.rentalDuration} Days`,
+    },
     {
       key: "period",
       label: "Rental Period",
-      value: `${book.rentalStartDate || "-"} → ${book.rentalEndDate || "-"}`,
+      value: `${formatDate(book.rental.rentStartDate)} → ${formatDate(
+        book.rental.expectedReturnDate
+      )}`,
     },
-    { key: "price", label: "Rental Price", value: `₹${book.rentalPrice}` },
+    { key: "price", label: "Rental Price", value: `₹${book.rental.rentalPrice}` },
     {
       key: "deposit",
       label: "Security Deposit",
-      value: `₹${book.securityDeposit}`,
+      value: `₹${book.rental.securityDeposit}`,
     },
   ];
 
   return (
-    <div className="mx-auto w-full max-w-3xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md">
-      {/* Top strip: date info + status badge */}
-      <div className="mb-5 flex items-center justify-between">
+    <div className="mx-auto w-full max-w-3xl rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md sm:p-6">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-baseline gap-2">
-          <Rb_Text className="text-gray-500">{dateInfo.label}</Rb_Text>
-          <Rb_Text>{dateInfo.value || "-"}</Rb_Text>
+          <Rb_Text className="text-sm text-gray-500">{dateInfo.label}</Rb_Text>
+          <Rb_Text>{formatDate(dateInfo.value)}</Rb_Text>
         </div>
-
-        <span
-          className={`shrink-0 rounded-full px-4 py-1 text-sm font-medium ${status.badge}`}
-        >
-          {status.label}
-        </span>
+        <OrderStatusBadge status={book.itemStatus} />
       </div>
 
-      <div className="flex items-end gap-5">
-        {/* Image */}
-        <div className="flex w-32 flex-shrink-0 items-center justify-center self-start">
+      <div className="flex flex-wrap items-end gap-5">
+        <div className="mx-auto flex w-32 flex-shrink-0 items-center justify-center self-start sm:mx-0">
           <Rb_Image
-            src={book.coverImage}
-            alt={book.name}
+            src={book.bookId.coverImage}
+            alt={book.bookId.name}
             shape="rounded"
             className="h-44 w-32 border"
           />
         </div>
 
-        {/* Right Section */}
-        <div className="flex flex-1 items-end justify-between gap-6">
-          {/* Book identity + rental details */}
-          <div className="grid grid-cols-[140px_1fr] gap-x-4 gap-y-2">
+        <div className="flex min-w-[260px] flex-1 flex-wrap items-end justify-between gap-">
+          <div className="grid min-w-[240px] grid-cols-[140px_1fr] gap-x-4 gap-y-2">
             {identityRows.map((row) => (
               <div className="contents" key={row.key}>
                 <Rb_Text className="text-left text-gray-500">
@@ -148,24 +133,24 @@ const BookCard = ({ book }: BookCardProps, {setPage}: Props) => {
               </div>
             ))}
           </div>
-          {/* Buttons */}
-          <div className="flex w-40 shrink-0 flex-col gap-2">
-            {book.status === "CONFIRMED" && (
-              <Rb_Button variant="secondary">Cancel Order</Rb_Button>
+
+          <div className="mx-auto mt-4 flex w-40 shrink-0 flex-col gap-2 sm:mt-0">
+            {(book.itemStatus === "pending" || book.itemStatus === "confirmed") && (
+              <Rb_Button variant="secondary">Cancel the Book</Rb_Button>
             )}
 
-            {book.status === "SHIPPED" && <Rb_Button>Track Order</Rb_Button>}
+            {book.itemStatus === "shipped" && <Rb_Button>Track Order</Rb_Button>}
 
-            {book.status === "DELIVERED" && (
+            {book.itemStatus === "delivered" && (
               <Rb_Button>Extend Duration</Rb_Button>
             )}
 
-            {(book.status === "RETURNED" ||
-              book.status === "CANCELLED") && (
+            {(book.itemStatus === "returned" ||
+              book.itemStatus === "cancelled") && (
               <Rb_Button>Rent Again</Rb_Button>
             )}
 
-            <Rb_Button variant="secondary" onClick={() => setPage("book-details")}>More Details</Rb_Button>
+            <Rb_Button variant="secondary" onClick={handleMoreDetails}>More Details</Rb_Button>
           </div>
         </div>
       </div>

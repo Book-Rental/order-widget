@@ -1,41 +1,55 @@
-import { Rb_Text } from "@rentbook/rentbook-ui-lib";
-import { mockOrderDetails } from "../mock/orderDetails";
-import OrderHeader from "../components/orderDetails/OrderHeader";
+import { Rb_LoadingSpinner, Rb_Text } from "@rentbook/rentbook-ui-lib";
+
+import { useOrderDetails } from "../hooks/useOrderDetails";
 import OrderInformation from "../components/orderDetails/OrderInformation";
-import HelpSection from "../components/orderDetails/HelpSection";
 import BookCard from "../components/orderDetails/BookCard";
+import OrderHeader from "../components/orderDetails/OrderHeader";
+import HelpSection from "../components/orderDetails/HelpSection";
+
 
 const OrderDetails = () => {
-  const order = mockOrderDetails;
+  const params = new URLSearchParams(window.location.search);
+  const ORDER_ID = params.get("orderId") ?? "";
+  const { data, isLoading, isError, error } = useOrderDetails(ORDER_ID);
+  const order = data?.data;
+
+  if (isLoading) {
+    return <Rb_LoadingSpinner />
+  }
+
+  if (isError || !order) {
+    return <div>{(error as Error)?.message}</div>;
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
       <OrderHeader
-        orderId={order.orderId}
-        orderDate={order.orderDate}
+        orderNumber={order.orderNumber}
+        createdAt={order.createdAt}
         orderStatus={order.orderStatus}
       />
 
-      <OrderInformation
-        shippingAddress={order.shippingAddress}
-        payment={order.payment}
-        priceSummary={order.priceSummary}
-      />
+      <OrderInformation order={order} />
 
       <div className="mt-8">
-        <Rb_Text variant="h4" className="mb-5">
-          Books in this Order ({order.books.length})
+        <Rb_Text variant="h4" className="mb-5 text-center">
+          Books in this Order ({order.items?.length ?? 0})
         </Rb_Text>
 
         <div className="space-y-6">
-          {order.books.map((book) => (
-            <BookCard key={book._id} book={book} />
+          {order.items?.map((book)=> (
+            <BookCard
+              key={book._id}
+              book={book}
+              orderId={order._id}
+            />
           ))}
         </div>
       </div>
+
       <div className="mt-8">
         <HelpSection />
-    </div>
+      </div>
     </div>
   );
 };

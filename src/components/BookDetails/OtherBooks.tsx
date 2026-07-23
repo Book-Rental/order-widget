@@ -1,45 +1,20 @@
-import {
-  Rb_Button,
-  Rb_Image,
-  Rb_Text,
-} from "@rentbook/rentbook-ui-lib";
-import type { OrderBook } from "../../types/order";
+import { Rb_Button, Rb_Image, Rb_Text } from "@rentbook/rentbook-ui-lib";
+import type { OrderItem } from "../../types/order";
+
 
 interface OtherBooksProps {
-  books: OrderBook[];
+  books: OrderItem[];
   selectedBookId: string;
-  onViewDetails?: (bookId: string) => void;
+  orderId: string;
 }
-
-const getStatusBadgeClasses = (status: OrderBook["status"]) => {
-  switch (status) {
-    case "CONFIRMED":
-      return "bg-yellow-100 text-yellow-700";
-
-    case "SHIPPED":
-      return "bg-blue-100 text-blue-700";
-
-    case "DELIVERED":
-      return "bg-green-100 text-green-700";
-
-    case "RETURNED":
-      return "bg-gray-200 text-gray-700";
-
-    case "CANCELLED":
-      return "bg-red-100 text-red-700";
-
-    default:
-      return "bg-gray-100 text-gray-700";
-  }
-};
 
 const OtherBooks = ({
   books,
   selectedBookId,
-  onViewDetails,
+  orderId,
 }: OtherBooksProps) => {
   const otherBooks = books.filter(
-    (book) => book._id !== selectedBookId
+    (book) => book.bookId._id !== selectedBookId
   );
 
   if (!otherBooks.length) {
@@ -63,50 +38,52 @@ const OtherBooks = ({
           >
             <div className="flex items-center gap-4">
               <Rb_Image
-                src={book.coverImage}
-                alt={book.name}
+                src={book.bookId.coverImage}
+                alt={book.bookId.name}
                 className="h-20 w-14 rounded object-cover"
               />
 
               <div>
                 <Rb_Text
                   variant="h6"
-                  className="font-semibold"
+                  className="text-left font-semibold"
                 >
-                  {book.name}
+                  {book.bookId.name}
                 </Rb_Text>
 
                 <Rb_Text
                   variant="small"
-                  className="mt-1 block text-gray-500"
+                  className="mt-1  text-left block text-gray-500"
                 >
-                  {book.author}
+                  {book.bookId.author}
                 </Rb_Text>
 
                 <Rb_Text
                   variant="small"
-                  className="mt-1 block text-gray-500"
+                  className="mt-1 text-left block text-gray-500"
                 >
-                  {book._id} · ₹{book.rentalPrice} / {book.rentalDuration}
+                   ₹{book.rental.rentalPrice} / {book.rental.rentalDuration} Days
                 </Rb_Text>
               </div>
             </div>
 
             <div className="flex items-center gap-4 max-md:w-full max-md:justify-between">
-              <span
-                className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${getStatusBadgeClasses(
-                  book.status
-                )}`}
-              >
-                {book.status}
-              </span>
-
               <Rb_Button
-                variant="outline"
-                onClick={() => onViewDetails?.(book._id)}
-              >
-                View Details
-              </Rb_Button>
+              variant="outline"
+              onClick={() => {
+                window.history.pushState(
+                  {},
+                  "",
+                  `/order-details?orderId=${orderId}&bookId=${book.bookId._id}`
+                );
+
+                window.dispatchEvent(
+                  new PopStateEvent("popstate")
+                );
+              }}
+            >
+              More Details
+            </Rb_Button>
             </div>
           </div>
         ))}

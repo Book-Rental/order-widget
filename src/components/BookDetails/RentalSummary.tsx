@@ -1,29 +1,27 @@
-import {
-  Rb_Button,
-  Rb_Label,
-  Rb_Text,
-} from "@rentbook/rentbook-ui-lib";
-import type { OrderBook } from "../../types/order";
+import { Rb_Button, Rb_Label, Rb_Text } from "@rentbook/rentbook-ui-lib";
+import type { OrderBookDetails } from "../../types/orderedBookDetalils";
 
 interface RentalSummaryProps {
-  book: OrderBook;
+  book: OrderBookDetails;
 }
 
-const getActionButton = (status: OrderBook["status"]) => {
+const getActionButton = (status: OrderBookDetails["itemStatus"]) => {
   switch (status) {
-    case "CONFIRMED":
-      return "Cancel Order";
+    case "pending":
+      return "Cancel the book";
+    case "confirmed":
+      return "Cancel the book";
 
-    case "SHIPPED":
-      return "Track Order";
+    case "shipped":
+      return "Track the book";
 
-    case "DELIVERED":
+    case "delivered":
       return "Extend Rental";
 
-    case "RETURNED":
+    case "returned":
       return "Rent Again";
 
-    case "CANCELLED":
+    case "cancelled":
       return "Rent Again";
 
     default:
@@ -31,26 +29,38 @@ const getActionButton = (status: OrderBook["status"]) => {
   }
 };
 
-const getStatusBadgeClasses = (status: OrderBook["status"]) => {
-  switch (status) {
-    case "CONFIRMED":
-      return "bg-yellow-100 text-yellow-700";
+// const getStatusBadgeClasses = (status: OrderBookDetails["itemStatus"]) => {
+//   switch (status) {
+//     case "pending":
+//       return "bg-yellow-100 text-yellow-700";
+//     case "confirmed":
+//       return "bg-yellow-100 text-yellow-700";
 
-    case "SHIPPED":
-      return "bg-blue-100 text-blue-700";
+//     case "shipped":
+//       return "bg-blue-100 text-blue-700";
 
-    case "DELIVERED":
-      return "bg-green-100 text-green-700";
+//     case "delivered":
+//       return "bg-green-100 text-green-700";
 
-    case "RETURNED":
-      return "bg-gray-200 text-gray-700";
+//     case "returned":
+//       return "bg-gray-200 text-gray-700";
 
-    case "CANCELLED":
-      return "bg-red-100 text-red-700";
+//     case "cancelled":
+//       return "bg-red-100 text-red-700";
 
-    default:
-      return "bg-gray-100 text-gray-700";
-  }
+//     default:
+//       return "bg-gray-100 text-gray-700";
+//   }
+// };
+
+const formatDate = (date: string | null) => {
+  if (!date) return "-";
+
+  return new Date(date).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 };
 
 interface SummaryRowProps {
@@ -60,7 +70,7 @@ interface SummaryRowProps {
 }
 
 const SummaryRow = ({ label, value, badgeClassName }: SummaryRowProps) => (
-  <div className=" h-full flex items-center justify-between border-b border-gray-100 pb-3 last:border-b-0 last:pb-0">
+  <div className="flex items-center justify-between border-b border-gray-100 pb-3 last:border-b-0 last:pb-0">
     <Rb_Label className="text-sm text-gray-500">
       {label}
     </Rb_Label>
@@ -81,53 +91,37 @@ const SummaryRow = ({ label, value, badgeClassName }: SummaryRowProps) => (
 
 const RentalSummary = ({ book }: RentalSummaryProps) => {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <Rb_Text
-        variant="h4"
-        className="mb-6"
-      >
+    <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <Rb_Text variant="h4" className="mb-6">
         Rental Summary
       </Rb_Text>
 
       <div className="space-y-4">
         <SummaryRow
-          label="Status"
-          value={book.status}
-          badgeClassName={getStatusBadgeClasses(book.status)}
-        />
-
-        <SummaryRow
           label="Rental Start"
-          value={book.rentalStartDate ?? "-"}
+          value={formatDate(book.rental.rentStartDate)}
         />
-
         <SummaryRow
           label="Rental End"
-          value={book.rentalEndDate ?? "-"}
+          value={formatDate(book.rental.expectedReturnDate)}
         />
-
         <SummaryRow
           label="Rental Duration"
-          value={book.rentalDuration}
+          value={`${book.rental.rentalDuration} Days`}
         />
-
         <SummaryRow
           label="Rental Price"
-          value={`₹${book.rentalPrice}`}
+          value={`₹${book.rental.rentalPrice}`}
         />
-
         <SummaryRow
           label="Security Deposit"
-          value={`₹${book.securityDeposit}`}
+          value={`₹${book.rental.securityDeposit}`}
         />
       </div>
 
-      <div className="mt-8">
-        <Rb_Button
-          variant="primary"
-          className="w-full"
-        >
-          {getActionButton(book.status)}
+      <div className="mt-auto pt-8">
+        <Rb_Button variant="primary" className="w-full">
+          {getActionButton(book.itemStatus)}
         </Rb_Button>
       </div>
     </div>
