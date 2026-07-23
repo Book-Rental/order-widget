@@ -1,29 +1,23 @@
 import BookInfoCard from "./BookInfoCard";
 import RentalSummary from "./RentalSummary";
-import type { OrderBook, ShippingAddress } from "../../types/order";
-import ShippingAddressCard from "./ShippingAddressCard";
+import RentalJourney from "./RentalJourney";
+import type { OrderBookDetails } from "../../types/orderedBookDetalils";
 
 interface BookOverviewProps {
-  book: OrderBook;
-  address: ShippingAddress;
+  book: OrderBookDetails;
 }
 
-function BookOverview({ book , address }: BookOverviewProps) {
+function BookOverview({ book }: BookOverviewProps) {
   return (
     <div className="grid grid-cols-12 items-stretch gap-6">
-
-      <div className="col-span-5 max-xl:col-span-12">
+      <div className="col-span-8 flex flex-col gap-6 max-lg:col-span-12">
         <BookInfoCard book={book} />
+        <RentalJourney status={book.itemStatus} />
       </div>
 
-      <div className="col-span-3 max-xl:col-span-6">
+      <div className="col-span-4 max-lg:col-span-12">
         <RentalSummary book={book} />
       </div>
-
-      <div className="col-span-4 max-xl:col-span-6">
-        <ShippingAddressCard address={address} />
-      </div>
-
     </div>
   );
 }

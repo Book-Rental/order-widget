@@ -4,7 +4,7 @@ import "./index.css";
 
 export interface OrderWidgetOptions {
   containerElementId: string;
-  page: "order-history" | "order-details" | "book-details";
+   view: "order-history" | "order-details";
 }
 
 declare global {
@@ -22,16 +22,13 @@ window.renderReactWidget = (config: string) => {
 
   try {
     options = JSON.parse(config);
-    console.log("Widget Options:", options);
   } catch {
-    console.error("Invalid widget config");
     return;
   }
 
   const container = document.getElementById(options.containerElementId);
 
   if (!container) {
-    console.error(`Container '${options.containerElementId}' not found`);
     return;
   }
 
@@ -42,7 +39,7 @@ window.renderReactWidget = (config: string) => {
   const root = createRoot(container);
 
   root.render(
-        <App/>
+        <App view={options.view}/>
   );
 
   roots[options.containerElementId] = root;

@@ -1,63 +1,92 @@
-export interface ShippingAddress {
+export interface Book {
+  _id: string;
+  name: string;
+  language: string;
+  author: string;
+  edition: string;
+  coverImage: string;
+  purchasePrice: number;
+  rentalPricePerDay: number;
+  rentalPricePerWeek: number;
+  rentalPricePerMonth: number;
+  securityDeposit: number;
+}
+
+export type ItemStatus = | "pending"  | "confirmed" | "shipped" | "delivered" | "returned" | "cancelled";
+
+export interface OrderItem {
+  _id: string;
+  bookId: Book;
+  sellerId: string;
+  quantity: number;
+  itemStatus: ItemStatus;
+  rental: RentalInfo;
+  deposit: DepositInfo;
+}
+
+export interface OrderDetails {
+  _id: string;
+  orderNumber: string;
+  userId: string;
+  items: OrderItem[];
+  shippingAddress: Address;
+  billingAddress: Address;
+  payment: Payment;
+  amount: Amount;
+  orderStatus: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RentalInfo {
+  rentalPrice: number;
+  securityDeposit: number;
+  rentalDuration: number;
+  rentStartDate: string | null;
+  expectedReturnDate: string | null;
+  actualReturnDate: string | null;
+  extensionCount: number;
+  maximumExtensions: number;
+  extendedUntil: string | null;
+  lateFee: number;
+}
+
+export interface DepositInfo {
+  amount: number;
+  status: string;
+  refundedAmount: number;
+  deductionAmount: number;
+  deductionReason: string;
+  refundedDate: string | null;
+}
+
+export interface Payment {
+  paymentMethod: string;
+  paymentStatus: string;
+  transactionId: string;
+  paidAt: string;
+}
+
+export interface Address {
   name: string;
   phone: string;
+  type: string;
   addressLine1: string;
-  addressLine2?: string;
+  addressLine2: string;
+  landmark: string;
   city: string;
   state: string;
   pincode: string;
   country: string;
 }
 
-export interface PaymentDetails {
-  method: string;
-  lastFourDigits: string;
-  paymentStatus: "PAID" | "PENDING" | "FAILED";
-}
-
-export interface PriceSummary {
-  rentalCharges: number;
+export interface Amount {
+  rentalAmount: number;
   securityDeposit: number;
-  shippingCharges: number;
+  deliveryFee: number;
   discount: number;
-  grandTotal: number;
-}
-
-export type BookStatus =
-  | "CONFIRMED"
-  | "SHIPPED"
-  | "DELIVERED"
-  | "RETURNED"
-  | "CANCELLED";
-
-export interface OrderBook {
-  _id: string;
-  name: string;
-  author: string;
-  coverImage: string;
-  rentalPrice: number;
-  securityDeposit: number;
-  quantity: number;
-  rentalDuration: string;
-  rentalStartDate?: string;
-  rentalEndDate?: string;
-  estimatedDeliveryDate?: string;
-  deliveredDate?: string;
-  returnedDate?: string;
-  cancelledDate?: string;
-  status: BookStatus;
-  publisher?: string;
-  category?: string;
-  language?: string;
-  isbn?: string;
-}
-
-export interface OrderDetails {
-  orderId: string;
-  orderDate: string;
-  orderStatus: "ACTIVE" | "COMPLETED" | "CANCELLED";
-  shippingAddress: ShippingAddress;
-  payment: PaymentDetails;
-  priceSummary: PriceSummary;
-  books: OrderBook[];
+  tax: number;
+  totalAmount: number;
+  refundAmount: number;
 }

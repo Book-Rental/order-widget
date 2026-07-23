@@ -1,32 +1,58 @@
-import { useState } from "react";
-import "./App.css";
-
-import OrderDetails from "./pages/OrderDetails";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import OrderHistory from "./pages/OrderHistory/OrderHistory";
+import OrderDetails from "./pages/OrderDetails";
 import OrderBookDetails from "./pages/OrderBookDetails";
-import '@rentbook/rentbook-ui-lib/microfrontend.min.css'
-function App() {
-  const [page, setPage] = useState<
-    "order-history" | "order-details" | "book-details"
-  >("order-history");
+import { useEffect } from "react";
 
-  switch (page) {
-    case "order-history":
-      return (
-        <OrderHistory
-          setPage={setPage}
-        />
-      );
+const queryClient = new QueryClient();
 
-    case "order-details":
-      return <OrderDetails />;
+type View = "order-history" | "order-details";
 
-    case "book-details":
-      return <OrderBookDetails />;
+type AppProps = {
+  view?: View;
+};
 
-    default:
-      return null;
-  }
+function App({ view }: AppProps) {
+
+  const currentView = view ?? "order-history";
+
+
+  const params = new URLSearchParams(
+    window.location.search
+  );
+
+  const orderId = params.get("orderId");
+  const bookId = params.get("bookId");
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("widget-loading-status", {
+        detail: false,
+      })
+    );
+  }, [currentView, orderId, bookId]);
+  return (
+    <QueryClientProvider client={queryClient}>
+      {currentView === "order-history" && (
+        <OrderHistory />
+      )}
+
+      {currentView === "order-details" &&
+        orderId &&
+        bookId && (
+          <OrderBookDetails
+          />
+        )
+      }
+
+      {currentView === "order-details" &&
+        orderId &&
+        !bookId && (
+          <OrderDetails />
+        )
+      }
+
+    </QueryClientProvider>
+  );
 }
 
 export default App;
