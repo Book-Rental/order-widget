@@ -5,8 +5,15 @@ import {
   MdCancel,
   MdAssignmentReturn,
 } from "react-icons/md";
+import { ReactNode } from "react";
 
-const STATUS_CONFIG: any = {
+type StatusConfig = {
+  className: string;
+  icon: ReactNode;
+};
+
+
+const STATUS_CONFIG: Record<string, StatusConfig> = {
   pending: {
     className: "bg-amber-50 text-amber-700",
     icon: <MdPending />,
