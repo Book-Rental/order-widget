@@ -79,7 +79,7 @@ const BookCard = ({ book, orderId  }: BookCardProps) => {
     {
       key: "period",
       label: "Rental Period",
-      value: `${formatDate(book.rental.rentStartDate)} → ${formatDate(
+      value: `${formatDate(book.rental.rentStartDate)} - ${formatDate(
         book.rental.expectedReturnDate
       )}`,
     },
@@ -112,7 +112,7 @@ const BookCard = ({ book, orderId  }: BookCardProps) => {
         </div>
 
         <div className="flex min-w-[260px] flex-1 flex-wrap items-end justify-between gap-">
-          <div className="grid min-w-[240px] grid-cols-[140px_1fr] gap-x-4 gap-y-2">
+          <div className="grid min-w-[240px] grid-cols-[140px_minmax(0,1fr)] gap-x-4 gap-y-3 sm:grid-cols-[140px_minmax(0,1fr)] sm:gap-x-4">
             {identityRows.map((row) => (
               <div className="contents" key={row.key}>
                 <Rb_Text className="text-left text-gray-500">
@@ -129,7 +129,7 @@ const BookCard = ({ book, orderId  }: BookCardProps) => {
                 <Rb_Text className="text-left text-gray-500">
                   {row.label}
                 </Rb_Text>
-                <Rb_Text className="text-left">{row.value}</Rb_Text>
+                <Rb_Text className="text-left leading-relaxed">{row.value}</Rb_Text>
               </div>
             ))}
           </div>

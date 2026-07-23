@@ -72,13 +72,17 @@ export interface Address {
   name: string;
   phone: string;
   type: string;
-  addressLine1: string;
-  addressLine2: string;
-  landmark: string;
+  street: string;
   city: string;
   state: string;
-  pincode: string;
+  zipCode: string;
   country: string;
+  location: {
+    type: string;
+    coordinates: number[];
+  };
+
+  isDefault: boolean;
 }
 
 export interface Amount {

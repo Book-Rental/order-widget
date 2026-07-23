@@ -29,30 +29,6 @@ const getActionButton = (status: OrderBookDetails["itemStatus"]) => {
   }
 };
 
-// const getStatusBadgeClasses = (status: OrderBookDetails["itemStatus"]) => {
-//   switch (status) {
-//     case "pending":
-//       return "bg-yellow-100 text-yellow-700";
-//     case "confirmed":
-//       return "bg-yellow-100 text-yellow-700";
-
-//     case "shipped":
-//       return "bg-blue-100 text-blue-700";
-
-//     case "delivered":
-//       return "bg-green-100 text-green-700";
-
-//     case "returned":
-//       return "bg-gray-200 text-gray-700";
-
-//     case "cancelled":
-//       return "bg-red-100 text-red-700";
-
-//     default:
-//       return "bg-gray-100 text-gray-700";
-//   }
-// };
-
 const formatDate = (date: string | null) => {
   if (!date) return "-";
 
@@ -116,6 +92,11 @@ const RentalSummary = ({ book }: RentalSummaryProps) => {
         <SummaryRow
           label="Security Deposit"
           value={`₹${book.rental.securityDeposit}`}
+        />
+
+        <SummaryRow
+          label="Payment Method"
+          value={book.payment.paymentMethod}
         />
       </div>
 

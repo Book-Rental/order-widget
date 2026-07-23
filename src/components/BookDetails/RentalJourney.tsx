@@ -1,7 +1,7 @@
 import { Rb_Text } from "@rentbook/rentbook-ui-lib";
 import type { ItemStatus } from "../../types/orderedBookDetalils"
 import type { IconType } from "react-icons";
-import { MdCheckCircle, MdHome, MdPayments,} from "react-icons/md";
+import { MdCheckCircle, MdHome, MdPayments, MdSchedule} from "react-icons/md";
 import { FaTruck, FaBoxOpen } from "react-icons/fa";
 import { RiArrowGoBackFill } from "react-icons/ri";
 
@@ -10,6 +10,7 @@ interface RentalJourneyProps {
 }
 
 const journeyTitles = [
+  "Pending",
   "Order Confirmed",
   "Shipped",
   "Delivered",
@@ -26,15 +27,16 @@ interface JourneyStep {
 }
 
 const statusStepMap: Record<ItemStatus, number> = {
-  pending: -1,
-  confirmed: 0,
-  shipped: 1,
-  delivered: 2,
-  returned: 5,
+  pending: 0,
+  confirmed: 1,
+  shipped: 2,
+  delivered: 3,
+  returned: 6,
   cancelled: -1,
 };
 
 const journeyIcons: Record<JourneyTitle, IconType> = {
+  Pending: MdSchedule,
   "Order Confirmed": MdCheckCircle,
   Shipped: FaTruck,
   Delivered: MdHome,
@@ -51,7 +53,7 @@ const RentalJourney = ({ status }: RentalJourneyProps) => {
     completed: index <= currentStep,
   }));
 
-  const currentIndex = steps.findIndex((step) => !step.completed);
+  const currentIndex = currentStep === steps.length - 1 ? currentStep : currentStep + 1;
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
@@ -59,7 +61,7 @@ const RentalJourney = ({ status }: RentalJourneyProps) => {
         Rental Journey
       </Rb_Text>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto scrollbar-hide">
         <div className="flex min-w-[640px] items-start sm:min-w-0">
           {steps.map((step, index) => {
             const isCurrent = index === currentIndex;

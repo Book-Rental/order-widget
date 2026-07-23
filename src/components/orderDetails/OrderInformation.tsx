@@ -17,13 +17,12 @@ const OrderInformation = ({
           </Rb_Text>
           <div className="space-y-1">
             <Rb_Text>{order.shippingAddress.name}</Rb_Text>
-            <Rb_Text>{order.shippingAddress.addressLine1}</Rb_Text>
-            <Rb_Text>{order.shippingAddress.landmark}</Rb_Text>
+            <Rb_Text>{order.shippingAddress.street}</Rb_Text>
             <Rb_Text>
               {order.shippingAddress.city}, {order.shippingAddress.state}
             </Rb_Text>
-            <Rb_Text>{order.shippingAddress.pincode}</Rb_Text>
             <Rb_Text>{order.shippingAddress.country}</Rb_Text>
+            <Rb_Text>{order.shippingAddress.zipCode}</Rb_Text>
             <Rb_Text>{order.shippingAddress.phone}</Rb_Text>
           </div>
         </div>
@@ -43,7 +42,7 @@ const OrderInformation = ({
 
         <div className="lg:pl-6">
           <Rb_Text variant="h5" className="mb-4 text-left">
-            Order Summary
+            Price Summary
           </Rb_Text>
 
           <div className="space-y-3">
@@ -59,12 +58,23 @@ const OrderInformation = ({
 
             <div className="flex items-center justify-between">
               <Rb_Text>Shipping</Rb_Text>
-
               <Rb_Text>
                 {order.amount.deliveryFee === 0
                   ? "Free"
                   : `₹${order.amount.deliveryFee}`}
               </Rb_Text>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <Rb_Text>Discount</Rb_Text>
+              <Rb_Text className="text-green-600">
+                -₹{order.amount.discount}
+              </Rb_Text>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <Rb_Text>Tax</Rb_Text>
+              <Rb_Text>₹{order.amount.tax}</Rb_Text>
             </div>
 
             <div className="border-t border-gray-200 pt-3">
