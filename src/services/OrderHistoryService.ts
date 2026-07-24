@@ -13,7 +13,11 @@ export const getOrdersByUserId = async (
   page: number
 ): Promise<OrdersResponse> => {
   const response = await fetch(
-    `${API_URL}/api/order/getByUserId/${userId}?page=${page}`
+    `${API_URL}/api/order/getByUserId/${userId}?page=${page}`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
   );
 
   if (!response.ok) {
