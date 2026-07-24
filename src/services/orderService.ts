@@ -12,7 +12,11 @@ export const getOrderDetails = async (
   orderId: string
 ): Promise<OrderDetailsResponse> => {
   const response = await fetch(
-    `${API_URL}/api/order/${orderId}`
+    `${API_URL}/api/order/${orderId}`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
   );
 
   if (!response.ok) {

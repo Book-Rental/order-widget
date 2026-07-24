@@ -11,7 +11,11 @@ export const getOrderBookDetails = async (
   bookId: string
 ): Promise<OrderBookDetailsResponse> => {
   const response = await fetch(
-    `${API_URL}/api/order/${orderId}/book/${bookId}`
+    `${API_URL}/api/order/${orderId}/book/${bookId}`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
   );
   if (!response.ok) {
     throw new Error("Failed to fetch ordered book details.");
