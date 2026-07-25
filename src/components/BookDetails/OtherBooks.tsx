@@ -30,7 +30,13 @@ const OtherBooks = ({
         Other Books in this Order
       </Rb_Text>
 
-      <div className="space-y-4">
+      <div
+        className={`space-y-4 ${
+          otherBooks.length > 2
+            ? "max-h-[360px] overflow-y-auto scrollbar-hide pr-2"
+            : ""
+        }`}
+      >
         {otherBooks.map((book) => (
           <div
             key={book._id}

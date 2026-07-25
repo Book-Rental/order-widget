@@ -9,14 +9,14 @@ interface BookInfoCardProps {
 const BookInfoCard = ({ book }: BookInfoCardProps) => {
   const detailRows = [
     // {
-    //   key: "publisher",
-    //   label: "Publisher",
-    //   value: book.publisher,
+    //   key: "name",
+    //   label: "Book",
+    //   value: book.book.name,
     // },
     // {
-    //   key: "isbn",
-    //   label: "ISBN",
-    //   value: book.isbn,
+    //   key: "author",
+    //   label: "Author",
+    //   value: book.book.author,
     // },
     {
       key: "edition",
@@ -38,18 +38,17 @@ const BookInfoCard = ({ book }: BookInfoCardProps) => {
   return (
     <div className="h-full rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <div className="flex flex-wrap gap-5">
-
-        <div className="mx-auto flex w-32 flex-shrink-0 items-start justify-center sm:mx-0">
+        <div className="mx-auto flex w-32 flex-shrink-0 items-start justify-center sm:mx-0 sm:justify-start">
           <Rb_Image
             src={book.book.coverImage}
             alt={book.book.name}
             shape="rounded"
-            className="h-44 w-32 border"
+            className="h-44 w-32 border !object-contain"
           />
         </div>
 
         <div className="min-w-[240px] flex-1">
-          <div className="flex flex-wrap items-start justify-between gap-2 max-sm:justify-center max-sm:text-center">
+          <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0">
               <Rb_Text variant="h6" className="font-semibold">
                 {book.book.name}
@@ -61,15 +60,21 @@ const BookInfoCard = ({ book }: BookInfoCardProps) => {
             </div>
             <OrderStatusBadge status={book.itemStatus} />
           </div>
+          {/* <div className="mb-4 flex justify-end">
+            <OrderStatusBadge status={book.itemStatus} />
+          </div> */}
 
-          <div className="mt-5 grid grid-cols-[140px_minmax(0,1fr)] gap-x-4 gap-y-3">
+          <div className="mt-4 space-y-3">
             {detailRows.map((row) => (
-              <div className="contents" key={row.key}>
-                <Rb_Text className="text-left text-gray-500">
+              <div 
+                className="flex items-start justify-between gap-4 border-b border-gray-100 pb-2 last:border-b-0 last:pb-0" 
+                key={row.key}
+              >
+                <Rb_Text className="shrink-0 text-gray-500">
                   {row.label}
                 </Rb_Text>
 
-                <Rb_Text className="text-left font-semibold">
+                <Rb_Text className="text-right font-semibold">
                   {row.value || "-"}
                 </Rb_Text>
               </div>
