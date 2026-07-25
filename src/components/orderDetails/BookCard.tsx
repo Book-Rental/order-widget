@@ -1,6 +1,7 @@
 import { Rb_Button, Rb_Image, Rb_Text } from "@rentbook/rentbook-ui-lib";
 import type { OrderItem } from "../../types/order";
 import OrderStatusBadge from "../OrderHistory/OrderStatusBadge";
+import { useUpdateOrder } from "../../hooks/useUpdateOrder";
 
 interface BookCardProps {
   book: OrderItem;
@@ -10,7 +11,6 @@ interface BookCardProps {
 const BookCard = ({ book, orderId  }: BookCardProps) => {
   const formatDate = (date?: string | null) => {
     if (!date) return "-";
-
     return new Date(date).toLocaleDateString("en-IN", {
       day: "2-digit",
       month: "short",
@@ -24,7 +24,6 @@ const BookCard = ({ book, orderId  }: BookCardProps) => {
       "",
       `/order-details?orderId=${orderId}&bookId=${book.bookId._id}`
     );
-
     window.dispatchEvent(
       new PopStateEvent("popstate")
     );
@@ -90,6 +89,20 @@ const BookCard = ({ book, orderId  }: BookCardProps) => {
       value: `₹${book.rental.securityDeposit}`,
     },
   ];
+  const updateOrderMutation = useUpdateOrder();
+  const handleCancelBook = () => {
+    updateOrderMutation.mutate({
+      orderId,
+      payload: {
+        items: [
+          {
+            _id: book._id,
+            itemStatus: "cancelled",
+          },
+        ],
+      },
+    });
+  };
 
   return (
    <div className="mx-auto w-full max-w-3xl rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md sm:p-6">
@@ -101,18 +114,18 @@ const BookCard = ({ book, orderId  }: BookCardProps) => {
         <OrderStatusBadge status={book.itemStatus} />
       </div>
 
-      <div className="flex items-start gap-5">
+      <div className="flex flex-wrap items-start gap-5">
         <div className="mx-auto flex w-32 flex-shrink-0 items-center justify-center self-start sm:mx-0">
           <Rb_Image
             src={book.bookId.coverImage}
             alt={book.bookId.name}
             shape="rounded"
-            className="h-44 w-32 border"
+            className="h-44 w-32 border !object-contain"
           />
         </div>
 
-        <div className="flex flex-1 justify-between gap-6">
-          <div className="grid flex-1 grid-cols-[140px_minmax(0,1fr)] gap-x-4 gap-y-2">
+        <div className="flex min-w-[260px] flex-1 flex-wrap justify-between gap-6">
+          <div className="grid min-w-[240px] flex-1 grid-cols-[140px_minmax(0,1fr)] gap-x-4 gap-y-2">
             {identityRows.map((row) => (
               <div className="contents" key={row.key}>
                 <Rb_Text className="text-left text-gray-500">
@@ -129,14 +142,22 @@ const BookCard = ({ book, orderId  }: BookCardProps) => {
                 <Rb_Text className="text-left text-gray-500">
                   {row.label}
                 </Rb_Text>
-                <Rb_Text className="font-semibold whitespace-nowrap text-ellipsis">{row.value}</Rb_Text>
+                <Rb_Text className="truncate font-semibold">{row.value}</Rb_Text>
               </div>
             ))}
           </div>
 
-          <div className="flex w-40 shrink-0 flex-col gap-2 self-end">
+          <div className="mx-auto flex w-40 shrink-0 flex-col gap-2 sm:mx-0 sm:self-end">
             {(book.itemStatus === "pending" || book.itemStatus === "confirmed") && (
-              <Rb_Button variant="secondary">Cancel the Book</Rb_Button>
+              <Rb_Button
+                variant="secondary"
+                onClick={handleCancelBook}
+                disabled={updateOrderMutation.isPending}
+              >
+                {updateOrderMutation.isPending
+                  ? "Cancelling..."
+                  : "Cancel the Book"}
+              </Rb_Button>
             )}
 
             {book.itemStatus === "shipped" && <Rb_Button>Track Order</Rb_Button>}
