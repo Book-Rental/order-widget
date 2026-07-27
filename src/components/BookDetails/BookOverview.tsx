@@ -5,9 +5,10 @@ import type { OrderBookDetails } from "../../types/orderedBookDetalils";
 
 interface BookOverviewProps {
   book: OrderBookDetails;
+  orderId: string;
 }
 
-function BookOverview({ book }: BookOverviewProps) {
+function BookOverview({ book, orderId, }: BookOverviewProps) {
   return (
     <div className="grid grid-cols-12 items-stretch gap-6">
       <div className="col-span-8 flex flex-col gap-6 max-lg:col-span-12">
@@ -16,7 +17,7 @@ function BookOverview({ book }: BookOverviewProps) {
       </div>
 
       <div className="col-span-4 max-lg:col-span-12">
-        <RentalSummary book={book} />
+        <RentalSummary book={book} orderId={orderId} />
       </div>
     </div>
   );

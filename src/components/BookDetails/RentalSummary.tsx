@@ -1,8 +1,13 @@
 import { Rb_Button, Rb_Label, Rb_Text } from "@rentbook/rentbook-ui-lib";
 import type { OrderBookDetails } from "../../types/orderedBookDetalils";
+import { useState } from "react";
+import { useUpdateOrder } from "../../hooks/useUpdateOrder";
+import ConfirmCancelModal from "../ConfirmCancelModal";
+import { showToast } from "../../utils/toast";
 
 interface RentalSummaryProps {
   book: OrderBookDetails;
+  orderId: string;
 }
 
 const getActionButton = (status: OrderBookDetails["itemStatus"]) => {
@@ -65,7 +70,64 @@ const SummaryRow = ({ label, value, badgeClassName }: SummaryRowProps) => (
   </div>
 );
 
-const RentalSummary = ({ book }: RentalSummaryProps) => {
+const RentalSummary = ({ book , orderId  }: RentalSummaryProps) => {
+  const updateOrderMutation = useUpdateOrder();
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const handleConfirmCancel = () => {
+    updateOrderMutation.mutate(
+      {
+        orderId,
+        payload: {
+          items: [
+            {
+              _id: book.orderItemId,
+              itemStatus: "cancelled",
+            },
+          ],
+        },
+      },
+      {
+        onSuccess: () => {
+          setShowCancelModal(false);
+          showToast(
+            "Book cancelled successfully.",
+            "success"
+          );
+        },
+        onError: (error) => {
+          showToast(
+            error instanceof Error
+              ? error.message
+              : "Failed to cancel book.",
+            "error"
+          );
+        },
+      }
+    );
+  };
+
+  const handleActionClick = () => {
+    switch (book.itemStatus) {
+      case "pending":
+      case "confirmed":
+        setShowCancelModal(true);
+        break;
+
+      case "shipped":
+        // TODO: Track Order
+        break;
+
+      case "delivered":
+        // TODO: Extend Rental
+        break;
+
+      case "returned":
+      case "cancelled":
+        // TODO: Rent Again
+        break;
+    }
+  };
+
   return (
     <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <Rb_Text variant="h4" className="mb-6">
@@ -101,10 +163,20 @@ const RentalSummary = ({ book }: RentalSummaryProps) => {
       </div>
 
       <div className="mt-auto pt-8">
-        <Rb_Button variant="primary" className="w-full">
+        <Rb_Button 
+          variant="primary" 
+          onClick={handleActionClick} 
+          disabled={updateOrderMutation.isPending}
+          className="w-full">
           {getActionButton(book.itemStatus)}
         </Rb_Button>
       </div>
+      <ConfirmCancelModal
+        open={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        onConfirm={handleConfirmCancel}
+        loading={updateOrderMutation.isPending}
+      />
     </div>
   );
 };

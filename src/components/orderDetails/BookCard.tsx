@@ -2,6 +2,11 @@ import { Rb_Button, Rb_Image, Rb_Text } from "@rentbook/rentbook-ui-lib";
 import type { OrderItem } from "../../types/order";
 import OrderStatusBadge from "../OrderHistory/OrderStatusBadge";
 import { useUpdateOrder } from "../../hooks/useUpdateOrder";
+import { useState } from "react";
+import ConfirmCancelModal from "../ConfirmCancelModal";
+import { showToast } from "../../utils/toast";
+import { useRentAgain } from "../../hooks/useRentAgain";
+import AddToCartModal from "../AddToCartModal";
 
 interface BookCardProps {
   book: OrderItem;
@@ -89,8 +94,10 @@ const BookCard = ({ book, orderId  }: BookCardProps) => {
       value: `₹${book.rental.securityDeposit}`,
     },
   ];
+
   const updateOrderMutation = useUpdateOrder();
-  const handleCancelBook = () => {
+  const [ showCancelModal , setShowCancelModal] = useState(false);
+  const handleConfirmCancel  = () => {
     updateOrderMutation.mutate({
       orderId,
       payload: {
@@ -101,8 +108,32 @@ const BookCard = ({ book, orderId  }: BookCardProps) => {
           },
         ],
       },
+    },
+    {
+      onSuccess: () => {
+        setShowCancelModal(false);
+        showToast(
+          "Book cancelled successfully.",
+          "success"
+        );
+      },
+      onError: (error) => {
+        setShowCancelModal(false);
+        showToast(
+          error instanceof Error
+            ? error.message
+            : "Failed to cancel book.",
+          "error"
+        );  
+      },
     });
   };
+
+  const { product, isModalOpen, isAddedToCart, isAddingToCart, openModal, closeModal, handleAddToCart, redirectToCart, } 
+  = useRentAgain({
+    orderId,
+    bookId: book.bookId._id,
+  });
 
   return (
    <div className="mx-auto w-full max-w-3xl rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md sm:p-6">
@@ -151,12 +182,10 @@ const BookCard = ({ book, orderId  }: BookCardProps) => {
             {(book.itemStatus === "pending" || book.itemStatus === "confirmed") && (
               <Rb_Button
                 variant="secondary"
-                onClick={handleCancelBook}
                 disabled={updateOrderMutation.isPending}
+                onClick={() => setShowCancelModal(true)}
               >
-                {updateOrderMutation.isPending
-                  ? "Cancelling..."
-                  : "Cancel the Book"}
+                Cancel the Book
               </Rb_Button>
             )}
 
@@ -168,11 +197,42 @@ const BookCard = ({ book, orderId  }: BookCardProps) => {
 
             {(book.itemStatus === "returned" ||
               book.itemStatus === "cancelled") && (
-              <Rb_Button>Rent Again</Rb_Button>
+              <Rb_Button
+                onClick={() => {
+                  if (isAddedToCart) {
+                    redirectToCart();
+                    return;
+                  }
+
+                  openModal();
+                }}
+                disabled={isAddingToCart}
+              >
+                {isAddedToCart ? "Added to cart" : "Rent Again"}
+              </Rb_Button>
             )}
 
-            <Rb_Button variant="secondary" onClick={handleMoreDetails}>More Details</Rb_Button>
+            <Rb_Button 
+             variant="secondary" 
+             onClick={handleMoreDetails}
+            >
+              More Details
+            </Rb_Button>
           </div>
+          <ConfirmCancelModal
+              open={showCancelModal}
+              onClose={() => setShowCancelModal(false)}
+              onConfirm={handleConfirmCancel}
+              loading={updateOrderMutation.isPending}
+          />
+          {product && (
+            <AddToCartModal
+              isOpen={isModalOpen}
+              onClose={closeModal}
+              product={product}
+              onProceed={handleAddToCart}
+            />
+          )}
         </div>
       </div>
     </div>
