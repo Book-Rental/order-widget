@@ -87,7 +87,7 @@ const RentalJourney = ({ status }: RentalJourneyProps) => {
                   />
 
                   <div
-                    className={`z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 sm:h-10 sm:w-10 ${
+                    className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 sm:h-10 sm:w-10 ${
                       step.completed
                         ? "border-green-600 bg-green-600 text-white"
                         : isCurrent

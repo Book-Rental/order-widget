@@ -68,6 +68,7 @@ export interface OrderBookDetails {
   orderStatus: ItemStatus;
   quantity: number;
   itemStatus: ItemStatus;
+  orderItemId: string;
   book: BookDetailsBook;
   seller: BookDetailsSeller;
   rental: RentalDetails;
