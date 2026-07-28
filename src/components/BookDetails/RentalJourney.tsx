@@ -1,7 +1,7 @@
 import { Rb_Text } from "@rentbook/rentbook-ui-lib";
 import type { ItemStatus } from "../../types/orderedBookDetalils"
 import type { IconType } from "react-icons";
-import { MdCheckCircle, MdHome, MdPayments, MdSchedule} from "react-icons/md";
+import { MdCheckCircle, MdHome, MdPayments, MdSchedule, MdCancel } from "react-icons/md";
 import { FaTruck, FaBoxOpen } from "react-icons/fa";
 import { RiArrowGoBackFill } from "react-icons/ri";
 
@@ -54,6 +54,7 @@ const RentalJourney = ({ status }: RentalJourneyProps) => {
   }));
 
   const currentIndex = currentStep === steps.length - 1 ? currentStep : currentStep + 1;
+  const isCancelled = status === "cancelled";
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
@@ -61,72 +62,85 @@ const RentalJourney = ({ status }: RentalJourneyProps) => {
         Rental Journey
       </Rb_Text>
 
-      <div className="overflow-x-auto scrollbar-hide">
-        <div className="flex min-w-[640px] items-start sm:min-w-0">
-          {steps.map((step, index) => {
-            const isCurrent = index === currentIndex;
-            const isFirst = index === 0;
-            const isLast = index === steps.length - 1;
+      {isCancelled ? (
+        <div className="flex flex-col items-center justify-center gap-2 text-center">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 border-red-600 bg-red-600 text-white sm:h-10 sm:w-10">
+            <MdCancel size={16} className="sm:hidden" />
+            <MdCancel size={18} className="hidden sm:block" />
+          </div>
+          <Rb_Text variant="small" className="font-semibold text-red-600">
+            Order Cancelled
+          </Rb_Text>
+          <Rb_Text variant="small" className="text-gray-500">
+            This order has been cancelled.
+          </Rb_Text>
+        </div>
+      ) : (
+        <div className="overflow-x-auto scrollbar-hide">
+          <div className="flex min-w-[640px] items-start sm:min-w-0">
+            {steps.map((step, index) => {
+              const isCurrent = index === currentIndex;
+              const isFirst = index === 0;
+              const isLast = index === steps.length - 1;
+              const Icon = journeyIcons[step.title];
+              return (
+                <div
+                  key={step.title}
+                  className="flex flex-1 flex-col items-center text-center"
+                >
+                  <div className="flex w-full items-center">
+                    <div
+                      className={`h-0.5 flex-1 ${
+                        isFirst
+                          ? "invisible"
+                          : steps[index - 1].completed
+                          ? "bg-green-600"
+                          : "bg-gray-200"
+                      }`}
+                    />
 
-            const Icon = journeyIcons[step.title];
+                    <div
+                      className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 sm:h-10 sm:w-10 ${
+                        step.completed
+                          ? "border-green-600 bg-green-600 text-white"
+                          : isCurrent
+                          ? "border-blue-600 bg-blue-600 text-white"
+                          : "border-gray-300 bg-white text-gray-400"
+                      }`}
+                    >
+                      <Icon size={16} className="sm:hidden" />
+                      <Icon size={18} className="hidden sm:block" />
+                    </div>
 
-            return (
-              <div
-                key={step.title}
-                className="flex flex-1 flex-col items-center text-center"
-              >
-                <div className="flex w-full items-center">
-                  <div
-                    className={`h-0.5 flex-1 ${
-                      isFirst
-                        ? "invisible"
-                        : steps[index - 1].completed
-                        ? "bg-green-600"
-                        : "bg-gray-200"
-                    }`}
-                  />
-
-                  <div
-                    className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 sm:h-10 sm:w-10 ${
-                      step.completed
-                        ? "border-green-600 bg-green-600 text-white"
-                        : isCurrent
-                        ? "border-blue-600 bg-blue-600 text-white"
-                        : "border-gray-300 bg-white text-gray-400"
-                    }`}
-                  >
-                    <Icon size={16} className="sm:hidden" />
-                    <Icon size={18} className="hidden sm:block" />
+                    <div
+                      className={`h-0.5 flex-1 ${
+                        isLast
+                          ? "invisible"
+                          : step.completed
+                          ? "bg-green-600"
+                          : "bg-gray-200"
+                      }`}
+                    />
                   </div>
 
-                  <div
-                    className={`h-0.5 flex-1 ${
-                      isLast
-                        ? "invisible"
-                        : step.completed
-                        ? "bg-green-600"
-                        : "bg-gray-200"
-                    }`}
-                  />
+                  <div className="mt-3 px-1">
+                    <Rb_Text
+                      variant="small"
+                      className={`font-semibold ${
+                        step.completed || isCurrent
+                          ? "text-gray-900"
+                          : "text-gray-400"
+                      }`}
+                    >
+                      {step.title}
+                    </Rb_Text>
+                  </div>
                 </div>
-
-                <div className="mt-3 px-1">
-                  <Rb_Text
-                    variant="small"
-                    className={`font-semibold ${
-                      step.completed || isCurrent
-                        ? "text-gray-900"
-                        : "text-gray-400"
-                    }`}
-                  >
-                    {step.title}
-                  </Rb_Text>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
