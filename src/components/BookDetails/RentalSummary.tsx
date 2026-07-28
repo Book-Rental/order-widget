@@ -166,7 +166,7 @@ const RentalSummary = ({ book , orderId  }: RentalSummaryProps) => {
         <Rb_Button 
           variant="primary" 
           onClick={handleActionClick} 
-          disabled={updateOrderMutation.isPending}
+          disabled={updateOrderMutation.isPending || book.itemStatus === "cancelled"}
           className="w-full">
           {getActionButton(book.itemStatus)}
         </Rb_Button>

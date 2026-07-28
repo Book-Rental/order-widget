@@ -63,10 +63,10 @@ const RentalJourney = ({ status }: RentalJourneyProps) => {
       </Rb_Text>
 
       {isCancelled ? (
-        <div className="flex flex-col items-center justify-center gap-3 py-6 text-center sm:py-8">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-red-600 bg-red-600 text-white sm:h-12 sm:w-12">
-            <MdCancel size={20} className="sm:hidden" />
-            <MdCancel size={24} className="hidden sm:block" />
+        <div className="flex flex-col items-center justify-center gap-2 text-center">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 border-red-600 bg-red-600 text-white sm:h-10 sm:w-10">
+            <MdCancel size={16} className="sm:hidden" />
+            <MdCancel size={18} className="hidden sm:block" />
           </div>
           <Rb_Text variant="small" className="font-semibold text-red-600">
             Order Cancelled
