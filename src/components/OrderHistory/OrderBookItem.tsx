@@ -3,7 +3,6 @@ import { Rb_Button, Rb_Image, Rb_Text } from "@rentbook/rentbook-ui-lib";
 import OrderStatusBadge from "./OrderStatusBadge";
 import { OrderItem } from "../../types/orderHistory";
 
-
 type Props = {
   item: OrderItem;
   orderId: string;
@@ -27,7 +26,8 @@ export default function OrderBookItem({
         gap-4
         px-6
         py-5
-        hover:bg-gray-50"
+        hover:bg-gray-50
+      "
     >
       <div className="flex gap-4">
         <Rb_Image
@@ -38,26 +38,40 @@ export default function OrderBookItem({
           onClick={() => onPdp(item.bookId)}
         />
 
-        <div>
+        <div className="flex flex-col gap-1">
+          {/* Book Name */}
           <Rb_Text
             variant="h6"
             className="
-            text-blue-800
-            cursor-pointer
-            hover:underline"
+              text-blue-800
+              text-base
+              font-semibold
+              leading-6
+              cursor-pointer
+              hover:underline
+            "
             onClick={() => onPdp(item.bookId)}
           >
             {item.name}
           </Rb_Text>
 
-          <Rb_Text className="text-gray-500">{item.author}</Rb_Text>
+          {/* Author */}
+          <Rb_Text className="text-sm text-gray-600 leading-5">
+            {item.author}
+          </Rb_Text>
 
-          <Rb_Text className="text-sm">
+          {/* Rental Price */}
+          <Rb_Text className="text-sm text-gray-600 leading-5">
             Rental: ₹{item.rentalPrice} / {item.rentalType}
           </Rb_Text>
 
-          <Rb_Text variant="h6">Total: ₹{item.totalPrice}</Rb_Text>
-          <Rb_Text className="text-gray-400 text-xs">
+          {/* Total Price */}
+          <Rb_Text className="text-sm text-gray-600 leading-5">
+            Total: ₹{item.totalPrice}
+          </Rb_Text>
+
+          {/* Additional Information */}
+          <Rb_Text className="text-xs text-gray-400 leading-4">
             Includes rental + security deposit
           </Rb_Text>
         </div>
