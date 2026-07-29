@@ -21,32 +21,33 @@ export default function OrderBookItem({
       className="
         flex
         flex-col
-        sm:flex-row
-        justify-between
+        lg:flex-row
+        lg:justify-between
         gap-4
         px-6
         py-5
         hover:bg-gray-50
       "
     >
-      <div className="flex gap-4">
+      {/* Left Section */}
+      <div className="flex flex-col items-center gap-4 text-center lg:flex-row lg:items-start lg:text-left">
         <Rb_Image
           src={item.coverImage}
           alt={item.name}
           shape="rounded"
-          className="w-20 h-28 !object-contain bg-white border border-gray-200 cursor-pointer"
+          className="w-24 h-32 border border-gray-200 bg-white !object-contain cursor-pointer sm:w-20 sm:h-28"
           onClick={() => onPdp(item.bookId)}
         />
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col items-center gap-1 text-center lg:items-start lg:text-left">
           {/* Book Name */}
           <Rb_Text
             variant="h6"
             className="
-              text-blue-800
               text-base
               font-semibold
               leading-6
+              text-blue-800
               cursor-pointer
               hover:underline
             "
@@ -56,31 +57,38 @@ export default function OrderBookItem({
           </Rb_Text>
 
           {/* Author */}
-          <Rb_Text className="text-sm text-gray-600 leading-5">
+          <Rb_Text className="text-sm leading-5 text-gray-600">
             {item.author}
           </Rb_Text>
 
-          {/* Rental Price */}
-          <Rb_Text className="text-sm text-gray-600 leading-5">
+          {/* Rental */}
+          <Rb_Text className="text-sm leading-5 text-gray-600">
             Rental: ₹{item.rentalPrice} / {item.rentalType}
           </Rb_Text>
-
-          {/* Total Price */}
-          <Rb_Text className="text-sm text-gray-600 leading-5">
-            Total: ₹{item.totalPrice}
-          </Rb_Text>
-
-          {/* Additional Information */}
-          <Rb_Text className="text-xs text-gray-400 leading-4">
-            Includes rental + security deposit
-          </Rb_Text>
+          {/* Total */}
+          <div className="text-center sm:text-right">
+            <Rb_Text className="text-sm leading-5 text-gray-700">
+              Total: ₹{item.totalPrice}{" "}
+              <span className="text-xs text-gray-400">
+                (Includes rental + security deposit)
+              </span>
+            </Rb_Text>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 items-end">
+      {/* Right Section */}
+      <div className="flex w-full flex-col items-center gap-3 text-center lg:w-auto lg:items-end lg:text-left">
+        
+        {/* Status */}
         <OrderStatusBadge status={item.itemStatus} />
 
-        <Rb_Button onClick={() => onDetails(orderId, item.bookId)}>
+        {/* Button */}
+        <Rb_Button
+          variant="primary"
+          className="w-full lg:w-auto"
+          onClick={() => onDetails(orderId, item.bookId)}
+        >
           More Details
         </Rb_Button>
       </div>
