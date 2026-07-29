@@ -154,13 +154,13 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
     <div className="mx-auto w-full max-w-3xl rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md sm:p-6">
       {/* Date & Status */}
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 items-baseline gap-2">
-          <Rb_Text className="text-sm leading-5 text-gray-600">
+        <div className="flex items-center gap-2">
+          <Rb_Text className="text-sm font-medium text-gray-700">
             {dateInfo.label}
           </Rb_Text>
 
           {dateInfo.value && (
-            <Rb_Text className="text-sm leading-5 text-gray-900">
+            <Rb_Text className="text-sm font-semibold text-gray-900">
               {formatDate(dateInfo.value)}
             </Rb_Text>
           )}
@@ -184,7 +184,7 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
         </div>
 
         {/* Content & Actions */}
-        <div className="flex min-w-0 flex-1 flex-col gap-6 lg:flex-row lg:justify-between">
+        <div className="flex min-w-0 flex-1 flex-col justify-between gap-6 lg:flex-row">
           {/* Information */}
           <div className="grid min-w-0 flex-1 grid-cols-[130px_minmax(0,1fr)] gap-x-4 gap-y-2">
             {identityRows.map((row) => (
@@ -198,6 +198,17 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
                 </Rb_Text>
               </div>
             ))}
+
+            {/* <div className="contents">
+              <Rb_Text className="text-left text-sm leading-5 text-gray-600">
+                Rental Period
+              </Rb_Text>
+
+              <div className="min-w-0 text-sm leading-5 text-gray-900">
+                <div>{formatDate(book.rental.rentStartDate)}</div>
+                <div>- {formatDate(book.rental.expectedReturnDate)}</div>
+              </div>
+            </div> */}
 
             {detailRows.map((row) => (
               <div className="contents" key={row.key}>
@@ -213,57 +224,64 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
           </div>
 
           {/* Actions */}
-          <div className="flex w-full shrink-0 flex-col gap-2 lg:w-40">
-            {(book.itemStatus === "pending" ||
-              book.itemStatus === "confirmed") && (
+          <div className="flex w-full flex-col justify-end gap-2 self-stretch lg:w-40 lg:self-end">
+              {(book.itemStatus === "pending" ||
+                book.itemStatus === "confirmed") && (
+                <Rb_Button
+                  variant="secondary"
+                  className="w-full"
+                  disabled={updateOrderMutation.isPending}
+                  onClick={() => setShowCancelModal(true)}
+                >
+                  Cancel the Book
+                </Rb_Button>
+              )}
+
+              {book.itemStatus === "shipped" && (
+                <Rb_Button
+                  variant="primary"
+                  className="w-full"
+                >
+                  Track Order
+                </Rb_Button>
+              )}
+
+              {book.itemStatus === "delivered" && (
+                <Rb_Button
+                  variant="primary"
+                  className="w-full"
+                >
+                  Extend Duration
+                </Rb_Button>
+              )}
+
+              {(book.itemStatus === "returned" ||
+                book.itemStatus === "cancelled") && (
+                <Rb_Button
+                  variant="primary"
+                  className="w-full"
+                  onClick={() => {
+                    if (isAddedToCart) {
+                      redirectToCart();
+                      return;
+                    }
+
+                    openModal();
+                  }}
+                  disabled={isAddingToCart}
+                >
+                  {isAddedToCart ? "Added to Cart" : "Rent Again"}
+                </Rb_Button>
+              )}
+
               <Rb_Button
-                variant="secondary"
+                variant="primary"
                 className="w-full"
-                disabled={updateOrderMutation.isPending}
-                onClick={() => setShowCancelModal(true)}
+                onClick={handleMoreDetails}
               >
-                Cancel the Book
+                More Details
               </Rb_Button>
-            )}
-
-            {book.itemStatus === "shipped" && (
-              <Rb_Button className="w-full">
-                Track Order
-              </Rb_Button>
-            )}
-
-            {book.itemStatus === "delivered" && (
-              <Rb_Button className="w-full">
-                Extend Duration
-              </Rb_Button>
-            )}
-
-            {(book.itemStatus === "returned" ||
-              book.itemStatus === "cancelled") && (
-              <Rb_Button
-                className="w-full"
-                onClick={() => {
-                  if (isAddedToCart) {
-                    redirectToCart();
-                    return;
-                  }
-
-                  openModal();
-                }}
-                disabled={isAddingToCart}
-              >
-                {isAddedToCart ? "Added to cart" : "Rent Again"}
-              </Rb_Button>
-            )}
-
-            <Rb_Button
-              variant="secondary"
-              className="w-full"
-              onClick={handleMoreDetails}
-            >
-              More Details
-            </Rb_Button>
-          </div>
+            </div>
         </div>
       </div>
 

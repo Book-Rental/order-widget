@@ -127,7 +127,7 @@ const OrderInformation = ({ order }: OrderInformationProps) => {
               </Rb_Text>
 
               <Rb_Text className="text-sm leading-5 text-gray-600">
-                ₹{order.amount.tax}
+                ₹{Number(order.amount.tax).toFixed(1)}
               </Rb_Text>
             </div>
 

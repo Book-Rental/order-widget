@@ -126,7 +126,7 @@ const RentalJourney = ({ status }: RentalJourneyProps) => {
                   <div className="mt-3 px-1">
                     <Rb_Text
                       variant="small"
-                      className={`font-semibold ${
+                      className={`${
                         step.completed || isCurrent
                           ? "text-gray-900"
                           : "text-gray-400"

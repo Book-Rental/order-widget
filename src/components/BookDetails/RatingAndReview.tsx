@@ -13,23 +13,26 @@ const RatingAndReview = () => {
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <Rb_Text variant="h4" className="mb-2 font-semibold">
+      <Rb_Text
+        variant="h4"
+        className="mb-2 text-base font-semibold leading-6 text-gray-900"
+      >
         Write a Review
       </Rb_Text>
 
       <Rb_Text
         variant="p"
-        className="mb-6 text-sm text-gray-500"
+        className="mb-6 text-sm leading-5 text-gray-600"
       >
         Share your experience with this book.
       </Rb_Text>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Rating Section */}
+        {/* Rating */}
         <div>
           <Rb_Text
             variant="span"
-            className="mb-3 block font-medium"
+            className="mb-3 block text-sm font-medium leading-5 text-gray-700"
           >
             Your Rating
           </Rb_Text>
@@ -41,11 +44,11 @@ const RatingAndReview = () => {
           />
         </div>
 
-        {/* Review Section */}
+        {/* Review */}
         <div className="lg:col-span-2">
           <Rb_Text
             variant="span"
-            className="mb-3 block font-medium"
+            className="mb-3 block text-sm font-medium leading-5 text-gray-700"
           >
             Your Review
           </Rb_Text>
@@ -59,13 +62,13 @@ const RatingAndReview = () => {
             }
             placeholder="Write your review here..."
             rows={6}
-            className="w-full rounded-lg border border-gray-300 p-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+            className="w-full rounded-lg border border-gray-300 p-3 text-sm leading-5 text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
           />
 
           <div className="mt-2 flex items-center justify-between">
             <Rb_Text
               variant="small"
-              className="text-gray-500"
+              className="text-sm leading-5 text-gray-500"
             >
               {review.length}/{MAX_REVIEW_LENGTH}
             </Rb_Text>
