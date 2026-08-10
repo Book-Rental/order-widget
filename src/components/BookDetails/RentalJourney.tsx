@@ -59,7 +59,7 @@ const RentalJourney = ({ status }: RentalJourneyProps) => {
     completed: index <= currentStep,
   }));
 
-  const currentIndex = currentStep === steps.length - 1 ? currentStep : currentStep + 1;
+  // const currentIndex = currentStep === steps.length - 1 ? currentStep : currentStep + 1;
   const isCancelled = status === "cancelled";
 
   return (
@@ -85,7 +85,7 @@ const RentalJourney = ({ status }: RentalJourneyProps) => {
         <div className="overflow-x-auto scrollbar-hide">
           <div className="flex min-w-[640px] items-start sm:min-w-0">
             {steps.map((step, index) => {
-              const isCurrent = index === currentIndex;
+              // const isCurrent = index === currentIndex;
               const isFirst = index === 0;
               const isLast = index === steps.length - 1;
               const Icon = journeyIcons[step.title];
@@ -109,8 +109,8 @@ const RentalJourney = ({ status }: RentalJourneyProps) => {
                       className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 sm:h-10 sm:w-10 ${
                         step.completed
                           ? "border-green-600 bg-green-600 text-white"
-                          : isCurrent
-                          ? "border-blue-600 bg-blue-600 text-white"
+                          // : isCurrent
+                          // ? "border-blue-600 bg-blue-600 text-white"
                           : "border-gray-300 bg-white text-gray-400"
                       }`}
                     >
@@ -133,7 +133,8 @@ const RentalJourney = ({ status }: RentalJourneyProps) => {
                     <Rb_Text
                       variant="small"
                       className={`${
-                        step.completed || isCurrent
+                        // step.completed || isCurrent
+                          step.completed 
                           ? "text-gray-900"
                           : "text-gray-400"
                       }`}
