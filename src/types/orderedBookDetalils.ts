@@ -59,7 +59,7 @@ export interface DepositDetails {
   refundedDate: string | null;
 }
 
-export type ItemStatus = | "pending"  | "confirmed" | "shipped" | "delivered" | "returned" | "cancelled";
+export type ItemStatus = | "pending"  | "confirmed" | "shipped" | "out_for_delivery" | "return_requested" | "delivered" | "returned" | "cancelled" | "rejected";
 
 export interface OrderBookDetails {
   orderId: string;

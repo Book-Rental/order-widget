@@ -4,19 +4,21 @@ import type { IconType } from "react-icons";
 import { MdCheckCircle, MdHome, MdPayments, MdSchedule, MdCancel } from "react-icons/md";
 import { FaTruck, FaBoxOpen } from "react-icons/fa";
 import { RiArrowGoBackFill } from "react-icons/ri";
+import { TbTruckDelivery } from "react-icons/tb";
 
 interface RentalJourneyProps {
   status: ItemStatus;
 }
 
 const journeyTitles = [
-  "Pending",
-  "Order Confirmed",
-  "Shipped",
-  "Delivered",
-  "Return Requested",
-  "Returned",
-  "Deposit Refunded",
+    "Pending",
+    "Order Confirmed",
+    "Shipped",
+    "Out for Delivery",
+    "Delivered",
+    "Return Requested",
+    "Returned",
+    "Deposit Refunded",
 ] as const;
 
 type JourneyTitle = (typeof journeyTitles)[number];
@@ -27,22 +29,26 @@ interface JourneyStep {
 }
 
 const statusStepMap: Record<ItemStatus, number> = {
-  pending: 0,
-  confirmed: 1,
-  shipped: 2,
-  delivered: 3,
-  returned: 6,
-  cancelled: -1,
+    pending: 0,
+    confirmed: 1,
+    shipped: 2,
+    out_for_delivery: 3,
+    delivered: 4,
+    return_requested: 5,
+    returned: 6,
+    cancelled: -1,
+    rejected: -1,
 };
 
 const journeyIcons: Record<JourneyTitle, IconType> = {
-  Pending: MdSchedule,
-  "Order Confirmed": MdCheckCircle,
-  Shipped: FaTruck,
-  Delivered: MdHome,
-  "Return Requested": RiArrowGoBackFill,
-  Returned: FaBoxOpen,
-  "Deposit Refunded": MdPayments,
+    Pending: MdSchedule,
+    "Order Confirmed": MdCheckCircle,
+    Shipped: FaTruck,
+    "Out for Delivery": TbTruckDelivery ,
+    Delivered: MdHome,
+    "Return Requested": RiArrowGoBackFill,
+    Returned: FaBoxOpen,
+    "Deposit Refunded": MdPayments,
 };
 
 const RentalJourney = ({ status }: RentalJourneyProps) => {
