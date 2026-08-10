@@ -6,6 +6,7 @@ import {
   MdAssignmentReturn,
 } from "react-icons/md";
 import { ReactNode } from "react";
+import { TbTruckDelivery } from "react-icons/tb";
 
 type StatusConfig = {
   className: string;
@@ -27,6 +28,10 @@ const STATUS_CONFIG: Record<string, StatusConfig> = {
   shipped: {
     className: "bg-indigo-50 text-indigo-700",
     icon: <MdLocalShipping />,
+  },
+  out_for_delivery: {
+    className: "bg-orange-50 text-orange-700",
+    icon: <TbTruckDelivery />,
   },
 
   delivered: {
