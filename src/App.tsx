@@ -3,7 +3,7 @@ import OrderHistory from "./pages/OrderHistory/OrderHistory";
 import OrderDetails from "./pages/OrderDetails";
 import OrderBookDetails from "./pages/OrderBookDetails";
 import { useEffect } from "react";
-
+import "@rentbook/rentbook-ui-lib/microfrontend.min.css"
 const queryClient = new QueryClient();
 
 type View = "order-history" | "order-details";

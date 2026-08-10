@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    name: Build Wishlist Widget
+    name: Build Order Widget
     runs-on: ubuntu-latest
 
     strategy:
