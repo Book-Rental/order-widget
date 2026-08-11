@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   Pagination,
@@ -24,12 +25,18 @@ export default function OrderHistory() {
     queryFn: () => getOrdersByUserId(userId, page),
   });
 
-  if (isPending) return <Rb_LoadingSpinner />;
+  if (isPending) {
+    return <Rb_LoadingSpinner />;
+  }
 
-  if (error) return <Rb_Text>Failed loading orders</Rb_Text>;
+  if (error) {
+    return <Rb_Text>Failed loading orders</Rb_Text>;
+  }
 
   const orders = data?.orders ?? [];
-  const totalPages = data?.totalPages ?? 1;
+
+  // totalPages is inside meta
+  const totalPages = data?.meta?.totalPages ?? 1;
 
   const redirectToCategory = () => {
     window.history.pushState({}, "", "/books");
@@ -89,3 +96,4 @@ export default function OrderHistory() {
     </div>
   );
 }
+
