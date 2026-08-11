@@ -4,8 +4,13 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export interface OrdersResponse {
   orders: Order[];
-  totalPages: number;
-  currentPage: number;
+    meta: {
+    totalRecords: number;
+    totalPages: number;
+    currentPage: number;
+    limit: number;
+    hasMore: boolean;
+  };
 }
 
 export const getOrdersByUserId = async (
@@ -28,7 +33,12 @@ export const getOrdersByUserId = async (
 
   return {
     orders: result?.data?.orders ?? [],
-    totalPages: result?.data?.totalPages ?? 1,
-    currentPage: result?.data?.currentPage ?? page,
+     meta: {
+      totalRecords: result?.data?.meta?.totalRecords ?? 0,
+      totalPages: result?.data?.meta?.totalPages ?? 1,
+      currentPage: result?.data?.meta?.currentPage ?? page,
+      limit: result?.data?.meta?.limit ?? 10,
+      hasMore: result?.data?.meta?.hasMore ?? false,
+    },
   };
 };
