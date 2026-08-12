@@ -237,14 +237,14 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
                 </Rb_Button>
               )}
 
-              {book.itemStatus === "shipped" && (
+              {/* {book.itemStatus === "shipped" && (
                 <Rb_Button
                   variant="primary"
                   className="w-full"
                 >
                   Track Order
                 </Rb_Button>
-              )}
+              )} */}
 
               {book.itemStatus === "delivered" && (
                 <Rb_Button
