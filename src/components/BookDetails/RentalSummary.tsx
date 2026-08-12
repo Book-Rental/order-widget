@@ -84,6 +84,10 @@ const RentalSummary = ({
   const updateOrderMutation = useUpdateOrder();
   const [showCancelModal, setShowCancelModal] = useState(false);
 
+  const redirectToTrackPage = () => {
+    window.history.pushState({}, "", `/track-shipment/${book.orderItemId}`);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  };
   const handleConfirmCancel = () => {
     updateOrderMutation.mutate(
       {
@@ -130,6 +134,7 @@ const RentalSummary = ({
 
       case "shipped":
         // TODO: Track Order
+        redirectToTrackPage();
         break;
 
       case "delivered":
