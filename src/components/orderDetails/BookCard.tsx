@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Rb_Button, Rb_Image, Rb_Text } from "@rentbook/rentbook-ui-lib";
-
 import type { OrderItem } from "../../types/order";
 import OrderStatusBadge from "../OrderHistory/OrderStatusBadge";
 import { useUpdateOrder } from "../../hooks/useUpdateOrder";
-import ConfirmCancelModal from "../ConfirmCancelModal";
+// import ConfirmCancelModal from "../ConfirmCancelModal";
 import { showToast } from "../../utils/toast";
 import { useRentAgain } from "../../hooks/useRentAgain";
 import AddToCartModal from "../AddToCartModal";
+import RentalActionModal, {
+  type RentalAction,
+  type ExtensionOption,
+} from "../RentalActionModal";
 
 interface BookCardProps {
   book: OrderItem;
@@ -34,6 +37,11 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
 
     window.dispatchEvent(new PopStateEvent("popstate"));
   };
+
+  // const redirectToTrackPage = () => {
+  //   window.history.pushState({}, "", `/track-shipment/${book._id}`);
+  //   window.dispatchEvent(new PopStateEvent("popstate"));
+  // };
 
   const getDateInfo = () => {
     switch (book.itemStatus) {
@@ -101,7 +109,25 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
 
   const updateOrderMutation = useUpdateOrder();
 
-  const [showCancelModal, setShowCancelModal] = useState(false);
+  // const [showCancelModal, setShowCancelModal] = useState(false);
+  const [rentalAction, setRentalAction] = useState<RentalAction | null>(null);
+  const extensionOptions: ExtensionOption[] = [
+  {
+    value: "day",
+    label: "1 Day",
+    price: book.bookId.rentalPricePerDay,
+  },
+  {
+    value: "week",
+    label: "1 Week",
+    price: book.bookId.rentalPricePerWeek,
+  },
+  {
+    value: "month",
+    label: "1 Month",
+    price: book.bookId.rentalPricePerMonth,
+  },
+];
 
   const handleConfirmCancel = () => {
     updateOrderMutation.mutate(
@@ -118,13 +144,12 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
       },
       {
         onSuccess: () => {
-          setShowCancelModal(false);
+          setRentalAction(null);
           showToast("Book cancelled successfully.", "success");
         },
 
         onError: (error) => {
-          setShowCancelModal(false);
-
+          setRentalAction(null);
           showToast(
             error instanceof Error
               ? error.message
@@ -231,7 +256,7 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
                   variant="secondary"
                   className="w-full"
                   disabled={updateOrderMutation.isPending}
-                  onClick={() => setShowCancelModal(true)}
+                  onClick={() => setRentalAction("cancel")}
                 >
                   Cancel the Book
                 </Rb_Button>
@@ -241,22 +266,46 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
                 <Rb_Button
                   variant="primary"
                   className="w-full"
+                  onClick={redirectToTrackPage}
                 >
-                  Track Order
+                  Track the Book
                 </Rb_Button>
               )} */}
 
               {book.itemStatus === "delivered" && (
-                <Rb_Button
-                  variant="primary"
-                  className="w-full"
-                >
-                  Extend Duration
-                </Rb_Button>
+                <>
+                  {book.rental.extensionCount <
+                    book.rental.maximumExtensions && (
+                    <Rb_Button
+                      variant="primary"
+                      className="w-full"
+                      onClick={() => setRentalAction("extend")}
+                    >
+                      Extend Rental
+                    </Rb_Button>
+                  )}
+                </>
               )}
 
-              {(book.itemStatus === "returned" ||
-                book.itemStatus === "cancelled") && (
+              {/* {book.itemStatus === "out_for_delivery" && (
+                <Rb_Text className="text-center text-sm text-gray-500">
+                  Your book is out for delivery.
+                </Rb_Text>
+              )}
+
+              {book.itemStatus === "return_requested" && (
+                <Rb_Text className="text-center text-sm text-gray-500">
+                  Return request has been raised. Your book will be collected soon.
+                </Rb_Text>
+              )}
+
+              {book.itemStatus === "returned" && (
+                <Rb_Text className="text-center text-sm text-gray-500">
+                  This book has been returned.
+                </Rb_Text>
+              )} */}
+
+              { book.itemStatus === "cancelled" && (
                 <Rb_Button
                   variant="primary"
                   className="w-full"
@@ -286,11 +335,71 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
       </div>
 
       {/* Cancel Modal */}
-      <ConfirmCancelModal
+      {/* <ConfirmCancelModal
         open={showCancelModal}
         onClose={() => setShowCancelModal(false)}
         onConfirm={handleConfirmCancel}
         loading={updateOrderMutation.isPending}
+      /> */}
+
+      <RentalActionModal
+        open={rentalAction !== null}
+        action={rentalAction ?? "cancel"}
+        onClose={() => setRentalAction(null)}
+        loading={updateOrderMutation.isPending}
+        extensionOptions={extensionOptions}
+        onConfirm={(extensionOption) => {
+          if (rentalAction === "cancel") {
+            handleConfirmCancel();
+            return;
+          }
+
+          if (rentalAction === "return") {
+            updateOrderMutation.mutate(
+              {
+                orderId,
+                payload: {
+                  items: [
+                    {
+                      _id: book._id,
+                      itemStatus: "return_requested",
+                    },
+                  ],
+                },
+              },
+              {
+                onSuccess: () => {
+                  setRentalAction(null);
+                  showToast("Return request raised successfully.", "success");
+                },
+                onError: (error) => {
+                  setRentalAction(null);
+                  showToast(
+                    error instanceof Error
+                      ? error.message
+                      : "Failed to raise return request.",
+                    "error"
+                  );
+                },
+              }
+            );
+
+            return;
+          }
+
+          if (rentalAction === "extend" && extensionOption) {
+            console.log("Selected extension:", extensionOption);
+
+            // No extension API yet.
+            // We will connect this when the backend API is available.
+            setRentalAction(null);
+
+            showToast(
+              `Selected ${extensionOption.label} extension for ₹${extensionOption.price}.`,
+              "success"
+            );
+          }
+        }}
       />
 
       {/* Rent Again Modal */}

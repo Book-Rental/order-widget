@@ -6,6 +6,7 @@ import { useOrderDetails } from "../hooks/useOrderDetails";
 import ShippingAddressCard from "../components/BookDetails/ShippingAddressCard";
 import HelpSection from "../components/orderDetails/HelpSection";
 import { Rb_LoadingSpinner } from "@rentbook/rentbook-ui-lib";
+import RentalPeriodNotification from "../components/BookDetails/RentalPeriodNotification";
 
 function OrderBookDetails() {
   const params = new URLSearchParams(window.location.search);
@@ -48,10 +49,16 @@ function OrderBookDetails() {
         </div>
 
         {/* Right Column */}
-        <div className="col-span-4 space-y-6 max-lg:col-span-12">
-          <ShippingAddressCard address={orderBook.shippingAddress} />
-          <HelpSection />
-        </div>
+         <div className="col-span-4 space-y-6 max-lg:col-span-12">
+            {orderBook.itemStatus === "delivered" && (
+              <RentalPeriodNotification
+                rentStartDate={orderBook.rental.rentStartDate}
+                expectedReturnDate={orderBook.rental.expectedReturnDate}
+              />
+            )}
+            <ShippingAddressCard address={orderBook.shippingAddress} />
+            <HelpSection />
+          </div>
       </div>
     </div>
   );
