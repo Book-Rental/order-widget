@@ -7,6 +7,7 @@ import ShippingAddressCard from "../components/BookDetails/ShippingAddressCard";
 import HelpSection from "../components/orderDetails/HelpSection";
 import { Rb_LoadingSpinner } from "@rentbook/rentbook-ui-lib";
 import RentalPeriodNotification from "../components/BookDetails/RentalPeriodNotification";
+import { useShipmentStatusByAwb } from "../hooks/useShipmentStatusByAwb";
 
 function OrderBookDetails() {
   const params = new URLSearchParams(window.location.search);
@@ -16,6 +17,21 @@ function OrderBookDetails() {
   const orderBook = bookDetailsData?.data;
   const { data: orderDetailsData, isLoading: isOrderLoading, isError: isOrderError, error: orderError,} = useOrderDetails(ORDER_ID);
   const orderItems = orderDetailsData?.data.items ?? [];
+
+  const returnAwbNumber = orderBook?.shipmentDetails?.find(
+    (shipment) => shipment.shipmentType === "Return"
+  )?.awbNumber;
+
+  const isPastReturnRequested =
+    orderBook?.itemStatus === "return_in_progress" ||
+    orderBook?.itemStatus === "returned";
+
+  const { data: shipmentStatusData } = useShipmentStatusByAwb(
+    returnAwbNumber,
+    isPastReturnRequested
+  );
+
+  const pickupAgent = shipmentStatusData?.data.pickupAgent;
 
   if ( isBookLoading || isOrderLoading ) {
     return <Rb_LoadingSpinner />;
@@ -50,10 +66,14 @@ function OrderBookDetails() {
 
         {/* Right Column */}
          <div className="col-span-4 space-y-6 max-lg:col-span-12">
-            {orderBook.itemStatus === "delivered" && (
+            {(orderBook.itemStatus === "delivered" ||
+              orderBook.itemStatus === "return_in_progress" ||
+              orderBook.itemStatus === "returned") && (
               <RentalPeriodNotification
                 rentStartDate={orderBook.rental.rentStartDate}
                 expectedReturnDate={orderBook.rental.expectedReturnDate}
+                pickupAgentName={pickupAgent?.fullName}
+                pickupAgentPhone={pickupAgent?.phone}
               />
             )}
             <ShippingAddressCard address={orderBook.shippingAddress} />

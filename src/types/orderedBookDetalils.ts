@@ -59,7 +59,7 @@ export interface DepositDetails {
   refundedDate: string | null;
 }
 
-export type ItemStatus = | "pending"  | "confirmed" | "shipped" | "out_for_delivery" | "return_requested" | "delivered" | "returned" | "cancelled" | "rejected";
+export type ItemStatus = | "pending"  | "confirmed" | "shipped" | "out_for_delivery" | "return_requested" | "return_in_progress" | "delivered" | "returned" | "cancelled" | "rejected";
 
 export interface OrderBookDetails {
   orderId: string;
@@ -77,4 +77,35 @@ export interface OrderBookDetails {
   payment: PaymentDetails;
   priceSummary: PriceSummary;
   deposit: DepositDetails;
+  shipmentDetails: ShipmentDetail[];
+}
+
+export interface ShipmentDetail {
+  shipmentId: string;
+  awbNumber: string;
+  shipmentType: string;
+  status: string;
+}
+
+export interface ShipmentPickupAgent {
+  _id: string;
+  fullName: string;
+  phone: string;
+  vehicleType?: string;
+}
+
+export interface ShipmentStatusResponse {
+  status: string;
+  message: string;
+  data: {
+    shipmentId: string;
+    awbNumber: string;
+    currentStatus: string;
+    pickupAgent?: ShipmentPickupAgent;
+    journeyDetails: {
+      event: string;
+      status: string;
+      eventAt: string;
+    }[];
+  };
 }

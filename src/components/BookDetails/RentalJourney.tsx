@@ -24,7 +24,7 @@ const journeyTitles = [
 type JourneyTitle = (typeof journeyTitles)[number];
 
 interface JourneyStep {
-  title: JourneyTitle;
+  title: JourneyTitle | "Return In Progress";
   completed: boolean;
 }
 
@@ -35,6 +35,7 @@ const statusStepMap: Record<ItemStatus, number> = {
     out_for_delivery: 3,
     delivered: 4,
     return_requested: 5,
+    return_in_progress: 5,
     returned: 6,
     cancelled: -1,
     rejected: -1,
@@ -53,13 +54,20 @@ const journeyIcons: Record<JourneyTitle, IconType> = {
 
 const RentalJourney = ({ status }: RentalJourneyProps) => {
   const currentStep = statusStepMap[status];
+  const RETURN_STEP_INDEX = 5;
 
-  const steps: JourneyStep[] = journeyTitles.map((title, index) => ({
-    title,
-    completed: index <= currentStep,
-  }));
+  const steps: JourneyStep[] = journeyTitles.map((title, index) => {
+    const displayTitle =
+      index === RETURN_STEP_INDEX && status === "return_in_progress"
+        ? "Return In Progress"
+        : title;
 
-  // const currentIndex = currentStep === steps.length - 1 ? currentStep : currentStep + 1;
+    return {
+      title: displayTitle,
+      completed: index <= currentStep,
+    };
+  });
+
   const isCancelled = status === "cancelled";
 
   return (
@@ -88,7 +96,7 @@ const RentalJourney = ({ status }: RentalJourneyProps) => {
               // const isCurrent = index === currentIndex;
               const isFirst = index === 0;
               const isLast = index === steps.length - 1;
-              const Icon = journeyIcons[step.title];
+              const Icon = journeyIcons[step.title as JourneyTitle] ?? RiArrowGoBackFill;
               return (
                 <div
                   key={step.title}
@@ -109,8 +117,6 @@ const RentalJourney = ({ status }: RentalJourneyProps) => {
                       className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 sm:h-10 sm:w-10 ${
                         step.completed
                           ? "border-green-600 bg-green-600 text-white"
-                          // : isCurrent
-                          // ? "border-blue-600 bg-blue-600 text-white"
                           : "border-gray-300 bg-white text-gray-400"
                       }`}
                     >
@@ -133,7 +139,6 @@ const RentalJourney = ({ status }: RentalJourneyProps) => {
                     <Rb_Text
                       variant="small"
                       className={`${
-                        // step.completed || isCurrent
                           step.completed 
                           ? "text-gray-900"
                           : "text-gray-400"
