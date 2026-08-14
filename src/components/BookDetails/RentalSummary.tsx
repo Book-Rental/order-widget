@@ -2,28 +2,16 @@ import { useState } from "react";
 import { Rb_Button, Rb_Label, Rb_Text } from "@rentbook/rentbook-ui-lib";
 import type { OrderBookDetails } from "../../types/orderedBookDetalils";
 import { useUpdateOrder } from "../../hooks/useUpdateOrder";
-// import ConfirmCancelModal from "../ConfirmCancelModal";
 import { showToast } from "../../utils/toast";
 import RentalActionModal, { type RentalAction, type ExtensionOption,} from "../RentalActionModal";
+import { useReadyForPickup } from "../../hooks/useReadyForPickup";
+import { useQueryClient } from "@tanstack/react-query";
+
 
 interface RentalSummaryProps {
   book: OrderBookDetails;
   orderId: string;
 }
-
-// const getActionButton = (status: OrderBookDetails["itemStatus"]) => {
-//   switch (status) {
-//     case "pending":
-//     case "confirmed": return "Cancel the Book";
-//     case "shipped"  : return "Track the Book";
-//     case "delivered": return "Extend Rental";
-//     case "returned" :
-//     case "cancelled": return "Rent Again";
-
-//     default:
-//       return "";
-//   }
-// };
 
 const formatDate = (date: string | null) => {
   if (!date) return "-";
@@ -75,6 +63,23 @@ const RentalSummary = ({
   orderId,
 }: RentalSummaryProps) => {
   const updateOrderMutation = useUpdateOrder();
+  const readyForPickupMutation = useReadyForPickup();
+  const queryClient = useQueryClient();
+  // const returnShipmentId = book.shipmentDetails?.find(
+  //   (shipment) => shipment.shipmentType === "Return"
+  // )?.shipmentId;
+
+  const forwardShipment = book.shipmentDetails?.find(
+    (shipment) => shipment.shipmentType === "Forward"
+  );
+
+  const returnShipment = book.shipmentDetails?.find(
+    (shipment) => shipment.shipmentType === "Return"
+  );
+  const returnShipmentId = returnShipment?.shipmentId;
+  const forwardAwbNumber = forwardShipment?.awbNumber;
+  const returnAwbNumber = returnShipment?.awbNumber;
+
   // const [showCancelModal, setShowCancelModal] = useState(false);
   const [rentalAction, setRentalAction] = useState<RentalAction | null>(null);
   const extensionOptions: ExtensionOption[] = [
@@ -95,10 +100,18 @@ const RentalSummary = ({
     },
   ];
 
-  const redirectToTrackPage = () => {
-    window.history.pushState({}, "", `/track-shipment/${book.orderItemId}`);
+  // const redirectToTrackPage = () => {
+  //   window.history.pushState({}, "", `/track-shipment/${book.orderItemId}`);
+  //   window.dispatchEvent(new PopStateEvent("popstate"));
+  // };
+
+  const redirectToTrackPage = (awbNumber: string) => {
+    window.history.pushState( {},"", `/track-shipment/${awbNumber}` );
     window.dispatchEvent(new PopStateEvent("popstate"));
   };
+
+  
+
   const handleConfirmCancel = () => {
     updateOrderMutation.mutate(
       {
@@ -174,7 +187,11 @@ const RentalSummary = ({
 
       case "shipped":
         // TODO: Track Order
-        redirectToTrackPage();
+        if (forwardAwbNumber) {
+          redirectToTrackPage(forwardAwbNumber);
+        } else {
+          showToast("Forward shipment not found.", "error");
+        }
         break;
 
       case "delivered":
@@ -273,11 +290,64 @@ const RentalSummary = ({
           <Rb_Button
             variant="primary"
             onClick={() => {
-              // TODO: Call ready-to-return API when available
+              if (!returnShipmentId) {
+                showToast(
+                  "Return shipment not found.",
+                  "error"
+                );
+                return;
+              }
+
+              readyForPickupMutation.mutate(returnShipmentId, {
+                onSuccess: async () => {
+                  await queryClient.invalidateQueries({
+                    queryKey: ["orderBookDetails"],
+                  });
+
+                  showToast(
+                    "Return pickup request raised successfully.",
+                    "success"
+                  );
+                },
+                onError: (error) => {
+                  showToast(
+                    error instanceof Error
+                      ? error.message
+                      : "Failed to make return shipment ready for pickup.",
+                    "error"
+                  );
+                },
+              });
             }}
+            disabled={
+              readyForPickupMutation.isPending || !returnShipmentId
+            }
             className="w-full"
           >
-            Ready to Return Book
+            {readyForPickupMutation.isPending
+              ? "Processing..."
+              : "Ready to Return Book"}
+          </Rb_Button>
+        )}
+
+        {book.itemStatus === "return_in_progress" && (
+          <Rb_Button
+            variant="primary"
+            onClick={() => {
+              if (!returnAwbNumber) {
+                showToast(
+                  "Return shipment AWB not found.",
+                  "error"
+                );
+                return;
+              }
+
+              redirectToTrackPage(returnAwbNumber);
+            }}
+            disabled={!returnAwbNumber}
+            className="w-full"
+          >
+            Track Return
           </Rb_Button>
         )}
 
@@ -317,7 +387,6 @@ const RentalSummary = ({
         )}
 
         {(
-          // book.itemStatus === "returned" ||
           book.itemStatus === "cancelled") && (
           <Rb_Button
             variant="primary"
