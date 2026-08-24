@@ -82,6 +82,7 @@ const RentalSummary = ({
 
   // const [showCancelModal, setShowCancelModal] = useState(false);
   const [rentalAction, setRentalAction] = useState<RentalAction | null>(null);
+  const [isReturnRequesting, setIsReturnRequesting] = useState(false);
   const extensionOptions: ExtensionOption[] = [
     {
       value: "day",
@@ -150,6 +151,8 @@ const RentalSummary = ({
   };
 
   const handleConfirmReturn = () => {
+    setRentalAction(null);
+    setIsReturnRequesting(true);
     updateOrderMutation.mutate(
       {
         orderId,
@@ -163,12 +166,14 @@ const RentalSummary = ({
         },
       },
       {
-        onSuccess: () => {
-          setRentalAction(null);
+        onSuccess: async () => {
           showToast("Return request raised successfully.", "success");
+          await queryClient.invalidateQueries({
+            queryKey: ["orderBookDetails"],
+          });
         },
         onError: (error) => {
-          setRentalAction(null);
+          setIsReturnRequesting(false);
           showToast(
             error instanceof Error ? error.message : "Failed to raise return request.",
             "error"
@@ -379,9 +384,12 @@ const RentalSummary = ({
             <Rb_Button
               variant="secondary"
               onClick={() => setRentalAction("return")}
+              disabled={isReturnRequesting || updateOrderMutation.isPending}
               className="w-full"
             >
-              Return Book
+              {isReturnRequesting || updateOrderMutation.isPending
+              ? "Processing..."
+              : "Return Book"}
             </Rb_Button>
           </>
         )}
@@ -419,7 +427,7 @@ const RentalSummary = ({
 
           if (rentalAction === "return") {
             handleConfirmReturn();
-            setRentalAction(null);
+            return;
           }
 
         }}
