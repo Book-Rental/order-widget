@@ -69,6 +69,7 @@ const RentalJourney = ({ status }: RentalJourneyProps) => {
   });
 
   const isCancelled = status === "cancelled";
+  const isRejected = status === "rejected";
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
@@ -76,17 +77,20 @@ const RentalJourney = ({ status }: RentalJourneyProps) => {
         Rental Journey
       </Rb_Text>
 
-      {isCancelled ? (
+      {isCancelled || isRejected ? (
         <div className="flex flex-col items-center justify-center gap-2 text-center">
           <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 border-red-600 bg-red-600 text-white sm:h-10 sm:w-10">
             <MdCancel size={16} className="sm:hidden" />
             <MdCancel size={18} className="hidden sm:block" />
           </div>
           <Rb_Text variant="small" className="font-semibold text-red-600">
-            Order Cancelled
+            {isRejected ? "Book Unavailable for Rent" : "Order Cancelled"}
           </Rb_Text>
           <Rb_Text variant="small" className="text-gray-500">
-            This order has been cancelled.
+             {isRejected
+              ? "Sorry, this book is currently unavailable for rent. You can try again when it becomes available."
+              : "This order has been cancelled."
+              }
           </Rb_Text>
         </div>
       ) : (
