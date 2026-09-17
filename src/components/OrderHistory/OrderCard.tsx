@@ -140,14 +140,16 @@ export default function OrderCard({ order, onDetails, onPdp }: Props) {
         "
       >
         {books.map((item) => (
-          <OrderBookItem
-            key={item.bookId}
-            item={item}
-            orderId={order.orderId}
-            onDetails={onDetails}
-            onPdp={onPdp}
-          />
-        ))}
+  <OrderBookItem
+    key={item.bookId}
+    item={item}
+    orderId={order.orderId}
+    orderType={order.orderType}
+    orderTotal={order.totalAmount}
+    onDetails={onDetails}
+    onPdp={onPdp}
+  />
+))}
       </div>
       {order.items.length > PREVIEW && (
         <button

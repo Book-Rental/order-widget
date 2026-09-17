@@ -5,12 +5,14 @@ interface OtherBooksProps {
   books: OrderItem[];
   selectedBookId: string;
   orderId: string;
+  orderType: "rent" | "auction";
 }
 
 const OtherBooks = ({
   books,
   selectedBookId,
   orderId,
+  orderType,
 }: OtherBooksProps) => {
   const otherBooks = books.filter(
     (book) => book.bookId._id !== selectedBookId
@@ -74,9 +76,17 @@ const OtherBooks = ({
                   {book.bookId.author}
                 </Rb_Text>
 
+                {orderType === "auction" ? (
+                  <Rb_Text className="mt-1 text-sm font-medium leading-5 text-gray-700">
+                    Auction Book
+                  </Rb_Text>
+                ) : (
                 <Rb_Text className="mt-1 text-sm leading-5 text-gray-600">
-                  ₹{book.rental.rentalPrice} / {book.rental.rentalDuration} Days
+                    {book.rental
+                      ? `₹${book.rental.rentalPrice} / ${book.rental.rentalDuration} Days`
+                      : "-"}
                 </Rb_Text>
+                )}
               </div>
             </div>
 

@@ -14,30 +14,90 @@ export interface Book {
 
 export type ItemStatus = | "pending"  | "confirmed" | "shipped" | "out_for_delivery" | "return_requested" | "delivered" | "returned" | "cancelled" | "rejected";
 
-export interface OrderItem {
+export type OrderItem = {
   _id: string;
-  bookId: Book;
+
+  bookId: {
+    _id: string;
+    name: string;
+    language: string;
+    author: string;
+    edition: string;
+    purchasePrice: number;
+    rentalPricePerDay: number;
+    rentalPricePerWeek: number;
+    rentalPricePerMonth: number;
+    securityDeposit: number;
+    coverImage: string;
+  };
+
   sellerId: string;
   quantity: number;
-  itemStatus: ItemStatus;
-  rental: RentalInfo;
-  deposit: DepositInfo;
-}
+  itemStatus: string;
 
-export interface OrderDetails {
+  rental: {
+    rentalDuration: number;
+    rentStartDate: string;
+    expectedReturnDate: string;
+    actualReturnDate?: string | null;
+    rentalPrice: number;
+    securityDeposit: number;
+    extensionCount: number;
+    maximumExtensions: number;
+  } | null;
+
+  deposit: number | null;
+
+  shipmentDetails: unknown[];
+};
+
+export type OrderDetails = {
   _id: string;
   orderNumber: string;
+  orderType: "rent" | "auction";
   userId: string;
+
   items: OrderItem[];
-  shippingAddress: Address;
-  billingAddress: Address;
-  payment: Payment;
-  amount: Amount;
+
+  auctionDetails?: {
+    auctionId: string;
+    winningBidId: string;
+    winningBidAmount: number;
+    winnerId: string;
+    wonAt: string;
+  };
+
+  shippingAddress: {
+    name: string;
+    street: string;
+    city: string;
+    state: string;
+    country: string;
+    zipCode: string;
+    phone: string;
+  };
+
+  payment: {
+    paymentMethod: string;
+    paymentStatus: string;
+  };
+
+  amount: {
+    itemAmount: number;
+    rentalAmount: number;
+    securityDeposit: number;
+    deliveryFee: number;
+    discount: number;
+    tax: number;
+    totalAmount: number;
+    refundAmount: number;
+  };
+
   orderStatus: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-}
+};
 
 export interface RentalInfo {
   rentalPrice: number;

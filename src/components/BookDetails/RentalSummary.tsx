@@ -1,16 +1,34 @@
 import { useState } from "react";
-import { Rb_Button, Rb_Label, Rb_Text } from "@rentbook/rentbook-ui-lib";
+import {
+  Rb_Button,
+  Rb_Label,
+  Rb_Text,
+} from "@rentbook/rentbook-ui-lib";
+
 import type { OrderBookDetails } from "../../types/orderedBookDetalils";
 import { useUpdateOrder } from "../../hooks/useUpdateOrder";
 import { showToast } from "../../utils/toast";
-import RentalActionModal, { type RentalAction, type ExtensionOption,} from "../RentalActionModal";
+import RentalActionModal, {
+  type RentalAction,
+  type ExtensionOption,
+} from "../RentalActionModal";
 import { useReadyForPickup } from "../../hooks/useReadyForPickup";
 import { useQueryClient } from "@tanstack/react-query";
-
 
 interface RentalSummaryProps {
   book: OrderBookDetails;
   orderId: string;
+  orderType: "rent" | "auction";
+  amount: {
+    itemAmount: number;
+    rentalAmount: number;
+    securityDeposit: number;
+    deliveryFee: number;
+    discount: number;
+    tax: number;
+    totalAmount: number;
+    refundAmount: number;
+  };
 }
 
 const formatDate = (date: string | null) => {
@@ -61,13 +79,36 @@ const SummaryRow = ({
 const RentalSummary = ({
   book,
   orderId,
+  orderType,
+  amount,
 }: RentalSummaryProps) => {
   const updateOrderMutation = useUpdateOrder();
   const readyForPickupMutation = useReadyForPickup();
   const queryClient = useQueryClient();
-  // const returnShipmentId = book.shipmentDetails?.find(
-  //   (shipment) => shipment.shipmentType === "Return"
-  // )?.shipmentId;
+
+  const [rentalAction, setRentalAction] =
+    useState<RentalAction | null>(null);
+
+  const [isReturnRequesting, setIsReturnRequesting] =
+    useState(false);
+
+  const extensionOptions: ExtensionOption[] = [
+    {
+      value: "day",
+      label: "1 Day",
+      price: book.rental?.rentalPrice ?? 0,
+    },
+    {
+      value: "week",
+      label: "1 Week",
+      price: book.rental?.rentalPrice ?? 0,
+    },
+    {
+      value: "month",
+      label: "1 Month",
+      price: book.rental?.rentalPrice ?? 0,
+    },
+  ];
 
   const forwardShipment = book.shipmentDetails?.find(
     (shipment) => shipment.shipmentType === "Forward"
@@ -76,42 +117,20 @@ const RentalSummary = ({
   const returnShipment = book.shipmentDetails?.find(
     (shipment) => shipment.shipmentType === "Return"
   );
-  const returnShipmentId = returnShipment?.shipmentId;
+
   const forwardAwbNumber = forwardShipment?.awbNumber;
   const returnAwbNumber = returnShipment?.awbNumber;
-
-  // const [showCancelModal, setShowCancelModal] = useState(false);
-  const [rentalAction, setRentalAction] = useState<RentalAction | null>(null);
-  const [isReturnRequesting, setIsReturnRequesting] = useState(false);
-  const extensionOptions: ExtensionOption[] = [
-    {
-      value: "day",
-      label: "1 Day",
-      price: 0,
-    },
-    {
-      value: "week",
-      label: "1 Week",
-      price: 0,
-    },
-    {
-      value: "month",
-      label: "1 Month",
-      price: 0,
-    },
-  ];
-
-  // const redirectToTrackPage = () => {
-  //   window.history.pushState({}, "", `/track-shipment/${book.orderItemId}`);
-  //   window.dispatchEvent(new PopStateEvent("popstate"));
-  // };
+  const returnShipmentId = returnShipment?.shipmentId;
 
   const redirectToTrackPage = (awbNumber: string) => {
-    window.history.pushState( {},"", `/track-shipment/${awbNumber}` );
+    window.history.pushState(
+      {},
+      "",
+      `/track-shipment/${awbNumber}`
+    );
+
     window.dispatchEvent(new PopStateEvent("popstate"));
   };
-
-  
 
   const handleConfirmCancel = () => {
     updateOrderMutation.mutate(
@@ -135,7 +154,6 @@ const RentalSummary = ({
             "success"
           );
         },
-
         onError: (error) => {
           setRentalAction(null);
 
@@ -153,6 +171,7 @@ const RentalSummary = ({
   const handleConfirmReturn = () => {
     setRentalAction(null);
     setIsReturnRequesting(true);
+
     updateOrderMutation.mutate(
       {
         orderId,
@@ -167,15 +186,24 @@ const RentalSummary = ({
       },
       {
         onSuccess: async () => {
-          showToast("Return request raised successfully.", "success");
+          showToast(
+            "Return request raised successfully.",
+            "success"
+          );
+
           await queryClient.invalidateQueries({
             queryKey: ["orderBookDetails"],
           });
+
+          setIsReturnRequesting(false);
         },
         onError: (error) => {
           setIsReturnRequesting(false);
+
           showToast(
-            error instanceof Error ? error.message : "Failed to raise return request.",
+            error instanceof Error
+              ? error.message
+              : "Failed to raise return request.",
             "error"
           );
         },
@@ -183,71 +211,109 @@ const RentalSummary = ({
     );
   };
 
-  const handleActionClick = () => {
-    switch (book.itemStatus) {
-      case "pending":
-      case "confirmed":
-        setRentalAction("cancel");
-        break;
-
-      case "shipped":
-        // TODO: Track Order
-        if (forwardAwbNumber) {
-          redirectToTrackPage(forwardAwbNumber);
-        } else {
-          showToast("Forward shipment not found.", "error");
-        }
-        break;
-
-      case "delivered":
-        // TODO: Extend Rental
-        break;
-
-      case "returned":
-      case "cancelled":
-        // TODO: Rent Again
-        break;
-
-      default:
-        break;
-    }
-  };
-
+  /* AUCTION */
+  /* AUCTION */
+if (orderType === "auction") {
   return (
     <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      {/* Heading */}
+      <div className="mb-6 flex items-center justify-between">
+        <Rb_Text
+          variant="h4"
+          className="text-base font-semibold text-gray-900"
+        >
+          Auction Summary
+        </Rb_Text>
+
+        <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-700">
+          Auction
+        </span>
+      </div>
+
+      <div className="space-y-4">
+        <SummaryRow
+          label="Winning Bid"
+          value={`₹${amount.itemAmount}`}
+        />
+
+        <SummaryRow
+          label="Delivery Fee"
+          value={`₹${amount.deliveryFee}`}
+        />
+
+        <SummaryRow
+          label="Discount"
+          value={`₹${amount.discount}`}
+        />
+
+        <SummaryRow
+          label="Tax"
+          value={`₹${amount.tax}`}
+        />
+
+        <SummaryRow
+          label="Total Amount"
+          value={`₹${amount.totalAmount}`}
+        />
+
+        <SummaryRow
+          label="Payment Method"
+          value={book.payment.paymentMethod}
+        />
+      </div>
+    </div>
+  );
+}
+
+  /* RENT */
+  return (
+    <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <Rb_Text
         variant="h4"
-        className="mb-6 text-base font-semibold leading-6 text-gray-900"
+        className="mb-6 text-base font-semibold text-gray-900"
       >
         Rental Summary
       </Rb_Text>
 
-      {/* Summary */}
       <div className="space-y-4">
         <SummaryRow
           label="Rental Start"
-          value={formatDate(book.rental.rentStartDate)}
+          value={formatDate(
+            book.rental?.rentStartDate ?? null
+          )}
         />
 
         <SummaryRow
           label="Rental End"
-          value={formatDate(book.rental.expectedReturnDate)}
+          value={formatDate(
+            book.rental?.expectedReturnDate ?? null
+          )}
         />
 
         <SummaryRow
           label="Rental Duration"
-          value={`${book.rental.rentalDuration} Days`}
+          value={
+            book.rental
+              ? `${book.rental.rentalDuration} Days`
+              : "-"
+          }
         />
 
         <SummaryRow
           label="Rental Price"
-          value={`₹${book.rental.rentalPrice}`}
+          value={
+            book.rental
+              ? `₹${book.rental.rentalPrice}`
+              : "-"
+          }
         />
 
         <SummaryRow
           label="Security Deposit"
-          value={`₹${book.rental.securityDeposit}`}
+          value={
+            book.rental
+              ? `₹${book.rental.securityDeposit}`
+              : "-"
+          }
         />
 
         <SummaryRow
@@ -257,6 +323,7 @@ const RentalSummary = ({
       </div>
 
       <div className="mt-auto flex flex-col gap-2 pt-8">
+        {/* Cancel */}
         {(book.itemStatus === "pending" ||
           book.itemStatus === "confirmed") && (
           <Rb_Button
@@ -269,19 +336,31 @@ const RentalSummary = ({
           </Rb_Button>
         )}
 
+        {/* Shipped */}
         {book.itemStatus === "shipped" && (
           <Rb_Button
             variant="primary"
-            onClick={handleActionClick}
+            onClick={() => {
+              if (!forwardAwbNumber) {
+                showToast(
+                  "Forward shipment not found.",
+                  "error"
+                );
+                return;
+              }
+
+              redirectToTrackPage(forwardAwbNumber);
+            }}
             className="w-full"
           >
             Track the Book
           </Rb_Button>
         )}
 
+        {/* Out for Delivery */}
         {book.itemStatus === "out_for_delivery" && (
-          <div className="mt-2 flex items-center gap-3 rounded-lg border border-orange-100 bg-orange-50 px-4 py-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-600">
+          <div className="flex items-center gap-3 rounded-lg border border-orange-100 bg-orange-50 px-4 py-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100 text-orange-600">
               🚚
             </span>
 
@@ -291,6 +370,43 @@ const RentalSummary = ({
           </div>
         )}
 
+        {/* Delivered */}
+        {book.itemStatus === "delivered" &&
+          book.rental && (
+            <>
+              {book.rental.extensionCount <
+                book.rental.maximumExtensions && (
+                <Rb_Button
+                  variant="primary"
+                  onClick={() =>
+                    setRentalAction("extend")
+                  }
+                  className="w-full"
+                >
+                  Extend Rental
+                </Rb_Button>
+              )}
+
+              <Rb_Button
+                variant="secondary"
+                onClick={() =>
+                  setRentalAction("return")
+                }
+                disabled={
+                  isReturnRequesting ||
+                  updateOrderMutation.isPending
+                }
+                className="w-full"
+              >
+                {isReturnRequesting ||
+                updateOrderMutation.isPending
+                  ? "Processing..."
+                  : "Return Book"}
+              </Rb_Button>
+            </>
+          )}
+
+        {/* Return Requested */}
         {book.itemStatus === "return_requested" && (
           <Rb_Button
             variant="primary"
@@ -303,29 +419,33 @@ const RentalSummary = ({
                 return;
               }
 
-              readyForPickupMutation.mutate(returnShipmentId, {
-                onSuccess: async () => {
-                  await queryClient.invalidateQueries({
-                    queryKey: ["orderBookDetails"],
-                  });
+              readyForPickupMutation.mutate(
+                returnShipmentId,
+                {
+                  onSuccess: async () => {
+                    await queryClient.invalidateQueries({
+                      queryKey: ["orderBookDetails"],
+                    });
 
-                  showToast(
-                    "Return pickup request raised successfully.",
-                    "success"
-                  );
-                },
-                onError: (error) => {
-                  showToast(
-                    error instanceof Error
-                      ? error.message
-                      : "Failed to make return shipment ready for pickup.",
-                    "error"
-                  );
-                },
-              });
+                    showToast(
+                      "Return pickup request raised successfully.",
+                      "success"
+                    );
+                  },
+                  onError: (error) => {
+                    showToast(
+                      error instanceof Error
+                        ? error.message
+                        : "Failed to make return shipment ready for pickup.",
+                      "error"
+                    );
+                  },
+                }
+              );
             }}
             disabled={
-              readyForPickupMutation.isPending || !returnShipmentId
+              readyForPickupMutation.isPending ||
+              !returnShipmentId
             }
             className="w-full"
           >
@@ -335,6 +455,7 @@ const RentalSummary = ({
           </Rb_Button>
         )}
 
+        {/* Return In Progress */}
         {book.itemStatus === "return_in_progress" && (
           <Rb_Button
             variant="primary"
@@ -356,9 +477,10 @@ const RentalSummary = ({
           </Rb_Button>
         )}
 
+        {/* Returned */}
         {book.itemStatus === "returned" && (
-          <div className="mt-2 flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-600">
+          <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-600">
               ✓
             </span>
 
@@ -368,47 +490,20 @@ const RentalSummary = ({
           </div>
         )}
 
-        {book.itemStatus === "delivered" && (
-          <>
-            {book.rental.extensionCount <
-              book.rental.maximumExtensions && (
-              <Rb_Button
-                variant="primary"
-                onClick={() => setRentalAction("extend")}
-                className="w-full"
-              >
-                Extend Rental
-              </Rb_Button>
-            )}
+        {/* Cancelled */}
+        {book.itemStatus === "cancelled" && (
+          <div className="flex items-center gap-3 rounded-lg border border-red-100 bg-red-50 px-4 py-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 text-red-600">
+              ✕
+            </span>
 
-            <Rb_Button
-              variant="secondary"
-              onClick={() => setRentalAction("return")}
-              disabled={isReturnRequesting || updateOrderMutation.isPending}
-              className="w-full"
-            >
-              {isReturnRequesting || updateOrderMutation.isPending
-              ? "Processing..."
-              : "Return Book"}
-            </Rb_Button>
-          </>
-        )}
-
-        {(
-          book.itemStatus === "cancelled") && (
-          <Rb_Button
-            variant="primary"
-            onClick={() => {
-              // TODO: Rent Again
-            }}
-            className="w-full"
-          >
-            Rent Again
-          </Rb_Button>
+            <Rb_Text className="text-sm font-medium text-red-700">
+              This book has been cancelled.
+            </Rb_Text>
+          </div>
         )}
       </div>
 
-      {/* Cancel Modal */}
       <RentalActionModal
         open={rentalAction !== null}
         action={rentalAction ?? "cancel"}
@@ -420,16 +515,18 @@ const RentalSummary = ({
           }
 
           if (rentalAction === "extend") {
-            console.log("Selected extension:", extensionOption);
+            console.log(
+              "Selected extension:",
+              extensionOption
+            );
+
             setRentalAction(null);
             return;
           }
 
           if (rentalAction === "return") {
             handleConfirmReturn();
-            return;
           }
-
         }}
         loading={updateOrderMutation.isPending}
         extensionOptions={extensionOptions}

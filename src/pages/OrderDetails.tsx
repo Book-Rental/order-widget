@@ -24,11 +24,11 @@ const OrderDetails = () => {
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
       <OrderHeader
-        orderNumber={order.orderNumber}
-        createdAt={order.createdAt}
-        orderStatus={order.orderStatus}
-      />
-
+  orderNumber={order.orderNumber}
+  createdAt={order.createdAt}
+  orderStatus={order.orderStatus}
+  orderType={order.orderType}
+/>
       <OrderInformation order={order} />
 
       <div className="mt-8">
@@ -37,13 +37,15 @@ const OrderDetails = () => {
         </Rb_Text>
 
         <div className="space-y-6">
-          {order.items?.map((book)=> (
-            <BookCard
-              key={book._id}
-              book={book}
-              orderId={order._id}
-            />
-          ))}
+          {order.items?.map((book) => (
+  <BookCard
+    key={book._id}
+    book={book}
+    orderId={order._id}
+    orderType={order.orderType}
+    amount={order.amount}
+  />
+))}
         </div>
       </div>
 

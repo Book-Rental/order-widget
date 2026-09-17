@@ -4,6 +4,7 @@ import OrderStatusBadge from "../OrderHistory/OrderStatusBadge";
 
 interface BookInfoCardProps {
   book: OrderBookDetails;
+  orderType: "rent" | "auction";
 }
 
 const BookInfoCard = ({ book }: BookInfoCardProps) => {
@@ -52,7 +53,15 @@ const BookInfoCard = ({ book }: BookInfoCardProps) => {
             >
               {book.book.name}
             </Rb_Text>
-
+ {/* <span
+    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+      orderType === "auction"
+        ? "bg-purple-100 text-purple-700"
+        : "bg-blue-100 text-blue-700"
+    }`}
+  >
+    {orderType === "auction" ? "Auction" : "Rent"}
+  </span> */}
             <div className="shrink-0">
               <OrderStatusBadge status={book.itemStatus} />
             </div>
