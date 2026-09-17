@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { Rb_Button, Rb_Image, Rb_Text } from "@rentbook/rentbook-ui-lib";
+import {
+  Rb_Button,
+  Rb_Image,
+  Rb_Text,
+} from "@rentbook/rentbook-ui-lib";
+
 import type { OrderItem } from "../../types/order";
 import OrderStatusBadge from "../OrderHistory/OrderStatusBadge";
 import { useUpdateOrder } from "../../hooks/useUpdateOrder";
-// import ConfirmCancelModal from "../ConfirmCancelModal";
 import { showToast } from "../../utils/toast";
 import { useRentAgain } from "../../hooks/useRentAgain";
 import AddToCartModal from "../AddToCartModal";
@@ -15,9 +19,30 @@ import RentalActionModal, {
 interface BookCardProps {
   book: OrderItem;
   orderId: string;
+  orderType: "rent" | "auction";
+  amount: {
+    itemAmount: number;
+    rentalAmount: number;
+    securityDeposit: number;
+    deliveryFee: number;
+    discount: number;
+    tax: number;
+    totalAmount: number;
+    refundAmount: number;
+  };
 }
 
-const BookCard = ({ book, orderId }: BookCardProps) => {
+const BookCard = ({
+  book,
+  orderId,
+  orderType,
+  amount,
+}: BookCardProps) => {
+  const [rentalAction, setRentalAction] =
+    useState<RentalAction | null>(null);
+
+  const updateOrderMutation = useUpdateOrder();
+
   const formatDate = (date?: string | null) => {
     if (!date) return "-";
 
@@ -38,12 +63,14 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
     window.dispatchEvent(new PopStateEvent("popstate"));
   };
 
-  // const redirectToTrackPage = () => {
-  //   window.history.pushState({}, "", `/track-shipment/${book._id}`);
-  //   window.dispatchEvent(new PopStateEvent("popstate"));
-  // };
-
   const getDateInfo = () => {
+    if (orderType === "auction" || !book.rental) {
+      return {
+        label: "",
+        value: "",
+      };
+    }
+
     switch (book.itemStatus) {
       case "pending":
       case "confirmed":
@@ -82,52 +109,61 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
     },
   ];
 
-  const detailRows = [
+  const detailRows =
+    orderType === "auction"
+      ? [
+          {
+            key: "winningBid",
+            label: "Winning Bid",
+            value: `₹${amount.itemAmount}`,
+          },
+        ]
+      : book.rental
+        ? [
+            {
+              key: "duration",
+              label: "Rental Duration",
+              value: `${book.rental.rentalDuration} Days`,
+            },
+            {
+              key: "period",
+              label: "Rental Period",
+              value: `${formatDate(
+                book.rental.rentStartDate
+              )} - ${formatDate(
+                book.rental.expectedReturnDate
+              )}`,
+            },
+            {
+              key: "price",
+              label: "Rental Price",
+              value: `₹${book.rental.rentalPrice}`,
+            },
+            {
+              key: "deposit",
+              label: "Security Deposit",
+              value: `₹${book.rental.securityDeposit}`,
+            },
+          ]
+        : [];
+
+  const extensionOptions: ExtensionOption[] = [
     {
-      key: "duration",
-      label: "Rental Duration",
-      value: `${book.rental.rentalDuration} Days`,
+      value: "day",
+      label: "1 Day",
+      price: book.bookId.rentalPricePerDay,
     },
     {
-      key: "period",
-      label: "Rental Period",
-      value: `${formatDate(book.rental.rentStartDate)} - ${formatDate(
-        book.rental.expectedReturnDate
-      )}`,
+      value: "week",
+      label: "1 Week",
+      price: book.bookId.rentalPricePerWeek,
     },
     {
-      key: "price",
-      label: "Rental Price",
-      value: `₹${book.rental.rentalPrice}`,
-    },
-    {
-      key: "deposit",
-      label: "Security Deposit",
-      value: `₹${book.rental.securityDeposit}`,
+      value: "month",
+      label: "1 Month",
+      price: book.bookId.rentalPricePerMonth,
     },
   ];
-
-  const updateOrderMutation = useUpdateOrder();
-
-  // const [showCancelModal, setShowCancelModal] = useState(false);
-  const [rentalAction, setRentalAction] = useState<RentalAction | null>(null);
-  const extensionOptions: ExtensionOption[] = [
-  {
-    value: "day",
-    label: "1 Day",
-    price: book.bookId.rentalPricePerDay,
-  },
-  {
-    value: "week",
-    label: "1 Week",
-    price: book.bookId.rentalPricePerWeek,
-  },
-  {
-    value: "month",
-    label: "1 Month",
-    price: book.bookId.rentalPricePerMonth,
-  },
-];
 
   const handleConfirmCancel = () => {
     updateOrderMutation.mutate(
@@ -145,9 +181,11 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
       {
         onSuccess: () => {
           setRentalAction(null);
-          showToast("Book cancelled successfully.", "success");
+          showToast(
+            "Book cancelled successfully.",
+            "success"
+          );
         },
-
         onError: (error) => {
           setRentalAction(null);
           showToast(
@@ -208,12 +246,15 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
           />
         </div>
 
-        {/* Content & Actions */}
+        {/* Content */}
         <div className="flex min-w-0 flex-1 flex-col justify-between gap-6 lg:flex-row">
           {/* Information */}
           <div className="grid min-w-0 flex-1 grid-cols-[130px_minmax(0,1fr)] gap-x-4 gap-y-2">
             {identityRows.map((row) => (
-              <div className="contents" key={row.key}>
+              <div
+                className="contents"
+                key={row.key}
+              >
                 <Rb_Text className="text-left text-sm leading-5 text-gray-600">
                   {row.label}
                 </Rb_Text>
@@ -224,19 +265,11 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
               </div>
             ))}
 
-            {/* <div className="contents">
-              <Rb_Text className="text-left text-sm leading-5 text-gray-600">
-                Rental Period
-              </Rb_Text>
-
-              <div className="min-w-0 text-sm leading-5 text-gray-900">
-                <div>{formatDate(book.rental.rentStartDate)}</div>
-                <div>- {formatDate(book.rental.expectedReturnDate)}</div>
-              </div>
-            </div> */}
-
             {detailRows.map((row) => (
-              <div className="contents" key={row.key}>
+              <div
+                className="contents"
+                key={row.key}
+              >
                 <Rb_Text className="text-left text-sm leading-5 text-gray-600">
                   {row.label}
                 </Rb_Text>
@@ -250,62 +283,44 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
 
           {/* Actions */}
           <div className="flex w-full flex-col justify-end gap-2 self-stretch lg:w-40 lg:self-end">
-              {(book.itemStatus === "pending" ||
+            {/* Cancel */}
+            {orderType === "rent" &&
+              (book.itemStatus === "pending" ||
                 book.itemStatus === "confirmed") && (
                 <Rb_Button
                   variant="secondary"
                   className="w-full"
-                  disabled={updateOrderMutation.isPending}
-                  onClick={() => setRentalAction("cancel")}
+                  disabled={
+                    updateOrderMutation.isPending
+                  }
+                  onClick={() =>
+                    setRentalAction("cancel")
+                  }
                 >
                   Cancel the Book
                 </Rb_Button>
               )}
 
-              {/* {book.itemStatus === "shipped" && (
+            {/* Extend Rental */}
+            {orderType === "rent" &&
+              book.itemStatus === "delivered" &&
+              book.rental &&
+              book.rental.extensionCount <
+                book.rental.maximumExtensions && (
                 <Rb_Button
                   variant="primary"
                   className="w-full"
-                  onClick={redirectToTrackPage}
+                  onClick={() =>
+                    setRentalAction("extend")
+                  }
                 >
-                  Track the Book
+                  Extend Rental
                 </Rb_Button>
-              )} */}
-
-              {book.itemStatus === "delivered" && (
-                <>
-                  {book.rental.extensionCount <
-                    book.rental.maximumExtensions && (
-                    <Rb_Button
-                      variant="primary"
-                      className="w-full"
-                      onClick={() => setRentalAction("extend")}
-                    >
-                      Extend Rental
-                    </Rb_Button>
-                  )}
-                </>
               )}
 
-              {/* {book.itemStatus === "out_for_delivery" && (
-                <Rb_Text className="text-center text-sm text-gray-500">
-                  Your book is out for delivery.
-                </Rb_Text>
-              )}
-
-              {book.itemStatus === "return_requested" && (
-                <Rb_Text className="text-center text-sm text-gray-500">
-                  Return request has been raised. Your book will be collected soon.
-                </Rb_Text>
-              )}
-
-              {book.itemStatus === "returned" && (
-                <Rb_Text className="text-center text-sm text-gray-500">
-                  This book has been returned.
-                </Rb_Text>
-              )} */}
-
-              { book.itemStatus === "cancelled" && (
+            {/* Rent Again */}
+            {orderType === "rent" &&
+              book.itemStatus === "cancelled" && (
                 <Rb_Button
                   variant="primary"
                   className="w-full"
@@ -319,29 +334,25 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
                   }}
                   disabled={isAddingToCart}
                 >
-                  {isAddedToCart ? "Added to Cart" : "Rent Again"}
+                  {isAddedToCart
+                    ? "Added to Cart"
+                    : "Rent Again"}
                 </Rb_Button>
               )}
 
-              <Rb_Button
-                variant="primary"
-                className="w-full"
-                onClick={handleMoreDetails}
-              >
-                More Details
-              </Rb_Button>
-            </div>
+            {/* More Details */}
+            <Rb_Button
+              variant="primary"
+              className="w-full"
+              onClick={handleMoreDetails}
+            >
+              More Details
+            </Rb_Button>
+          </div>
         </div>
       </div>
 
-      {/* Cancel Modal */}
-      {/* <ConfirmCancelModal
-        open={showCancelModal}
-        onClose={() => setShowCancelModal(false)}
-        onConfirm={handleConfirmCancel}
-        loading={updateOrderMutation.isPending}
-      /> */}
-
+      {/* Rental Action Modal */}
       <RentalActionModal
         open={rentalAction !== null}
         action={rentalAction ?? "cancel"}
@@ -370,10 +381,15 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
               {
                 onSuccess: () => {
                   setRentalAction(null);
-                  showToast("Return request raised successfully.", "success");
+
+                  showToast(
+                    "Return request raised successfully.",
+                    "success"
+                  );
                 },
                 onError: (error) => {
                   setRentalAction(null);
+
                   showToast(
                     error instanceof Error
                       ? error.message
@@ -387,11 +403,10 @@ const BookCard = ({ book, orderId }: BookCardProps) => {
             return;
           }
 
-          if (rentalAction === "extend" && extensionOption) {
-            console.log("Selected extension:", extensionOption);
-
-            // No extension API yet.
-            // We will connect this when the backend API is available.
+          if (
+            rentalAction === "extend" &&
+            extensionOption
+          ) {
             setRentalAction(null);
 
             showToast(

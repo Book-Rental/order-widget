@@ -9,11 +9,11 @@ export type OrderItem = {
   itemStatus: string;
 };
 
-
 export type Order = {
   orderId: string;
   orderNumber: string;
   orderDate: string;
+   orderType: "auction" | "rent";
   totalAmount: number;
   totalBooks: number;
   items: OrderItem[];

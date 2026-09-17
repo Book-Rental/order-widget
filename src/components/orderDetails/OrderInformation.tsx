@@ -10,9 +10,12 @@ const OrderInformation = ({ order }: OrderInformationProps) => {
     order.payment.paymentStatus.charAt(0).toUpperCase() +
     order.payment.paymentStatus.slice(1);
 
+  const isAuction = order.orderType === "auction";
+
   return (
     <div className="rounded-b-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
       <div className="grid gap-6 md:grid-cols-3">
+
         {/* Shipping Address */}
         <div className="border-b border-gray-200 pb-6 text-left lg:border-b-0 lg:border-r lg:pb-0 lg:pr-6">
           <Rb_Text
@@ -32,7 +35,8 @@ const OrderInformation = ({ order }: OrderInformationProps) => {
             </Rb_Text>
 
             <Rb_Text className="text-sm leading-5 text-gray-600">
-              {order.shippingAddress.city}, {order.shippingAddress.state}
+              {order.shippingAddress.city},{" "}
+              {order.shippingAddress.state}
             </Rb_Text>
 
             <Rb_Text className="text-sm leading-5 text-gray-600">
@@ -79,26 +83,45 @@ const OrderInformation = ({ order }: OrderInformationProps) => {
           </Rb_Text>
 
           <div className="space-y-3">
-            <div className="flex items-center justify-between gap-4">
-              <Rb_Text className="text-sm leading-5 text-gray-600">
-                Rental Charges
-              </Rb_Text>
 
-              <Rb_Text className="text-sm leading-5 text-gray-600">
-                ₹{order.amount.rentalAmount}
-              </Rb_Text>
-            </div>
+            {/* Auction */}
+            {isAuction ? (
+              <div className="flex items-center justify-between gap-4">
+                <Rb_Text className="text-sm leading-5 text-gray-600">
+                  Winning Bid
+                </Rb_Text>
 
-            <div className="flex items-center justify-between gap-4">
-              <Rb_Text className="text-sm leading-5 text-gray-600">
-                Security Deposit
-              </Rb_Text>
+                <Rb_Text className="text-sm leading-5 text-gray-600">
+                  ₹{order.amount.itemAmount}
+                </Rb_Text>
+              </div>
+            ) : (
+              <>
+                {/* Rental Charges */}
+                <div className="flex items-center justify-between gap-4">
+                  <Rb_Text className="text-sm leading-5 text-gray-600">
+                    Rental Charges
+                  </Rb_Text>
 
-              <Rb_Text className="text-sm leading-5 text-gray-600">
-                ₹{order.amount.securityDeposit}
-              </Rb_Text>
-            </div>
+                  <Rb_Text className="text-sm leading-5 text-gray-600">
+                    ₹{order.amount.rentalAmount}
+                  </Rb_Text>
+                </div>
 
+                {/* Security Deposit */}
+                <div className="flex items-center justify-between gap-4">
+                  <Rb_Text className="text-sm leading-5 text-gray-600">
+                    Security Deposit
+                  </Rb_Text>
+
+                  <Rb_Text className="text-sm leading-5 text-gray-600">
+                    ₹{order.amount.securityDeposit}
+                  </Rb_Text>
+                </div>
+              </>
+            )}
+
+            {/* Shipping */}
             <div className="flex items-center justify-between gap-4">
               <Rb_Text className="text-sm leading-5 text-gray-600">
                 Shipping
@@ -111,6 +134,7 @@ const OrderInformation = ({ order }: OrderInformationProps) => {
               </Rb_Text>
             </div>
 
+            {/* Discount */}
             <div className="flex items-center justify-between gap-4">
               <Rb_Text className="text-sm leading-5 text-gray-600">
                 Discount
@@ -121,6 +145,7 @@ const OrderInformation = ({ order }: OrderInformationProps) => {
               </Rb_Text>
             </div>
 
+            {/* Tax */}
             <div className="flex items-center justify-between gap-4">
               <Rb_Text className="text-sm leading-5 text-gray-600">
                 Tax
@@ -131,6 +156,7 @@ const OrderInformation = ({ order }: OrderInformationProps) => {
               </Rb_Text>
             </div>
 
+            {/* Total */}
             <div className="border-t border-gray-200 pt-3">
               <div className="flex items-center justify-between gap-4">
                 <Rb_Text className="text-sm font-semibold leading-5 text-gray-900">
@@ -142,6 +168,7 @@ const OrderInformation = ({ order }: OrderInformationProps) => {
                 </Rb_Text>
               </div>
             </div>
+
           </div>
         </div>
       </div>
